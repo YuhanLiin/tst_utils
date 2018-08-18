@@ -158,121 +158,128 @@ static _tst_hook_func_t _tst_g_teardown_ptr = &_tst_do_nothing;
 // Runs a test runner function of the specified name
 #define tst_run_test( name ) _tst_gen_name( name )()
 
-// Asserts equality. Type and format string of the values are needed
-// Requires comparator macro that returns true if the two values result in passing the test
-#define _tst_assert_base( expr, expected, fmt_spec, type, cmp, cmp_text ) do {\
-    type _expr = (expr);\
-    type _expected = (expected);\
-    if( !cmp( _expr, _expected ) ){\
-        fprintf(\
-            stderr,\
-            "Assert error in %s:%d: ",\
-            __FILE__, __LINE__\
-        );\
-        fprintf(\
-            stderr,\
-            "Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
-            #expr, _expr, _expected\
-        );\
-        _tst_assertion_stats.failed += 1;\
+#define _tst_concat(a, b) a##b
+
+#define _tst_perror(...) fprintf(stderr, __VA_ARGS__)
+
+#define _tst_print_assert_err(filename, linenum)\
+    _tst_perror("Assert error in %s:%d: ", filename, linenum)
+
+// Generates assertion function definition for the specified type as well as the
+// comparison macro and format specifiers used for that type
+// The last three args of the function will be passed in via the macro
+#define _tst_decl_assert(assert_name, fmt_spec, type, cmp, cmp_text)\
+static int assert_name(\
+    type expr, type expected, const char * filename, int linenum, const char * expr_str)\
+{\
+    if(!cmp(expr, expected)){\
+        _tst_print_assert_err(filename, linenum);\
+        _tst_perror(\
+                "Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
+                expr_str, expr, expected);\
+        return 0;\
     } else {\
-        _tst_assertion_stats.passed += 1;\
+        return 1;\
     }\
-} while( 0 )
+}
 
-#define _tst_print_array( arr, len, fmt_spec ) do {\
-    fprintf( stderr, "{ " );\
-    for( size_t _i = 0; _i < len; _i++ ) {\
-        fprintf( stderr, fmt_spec" ", arr[_i] );\
+// Generates unforgiving assert definition for array types. Parameters still refer to scalar type
+// The assertion fails if any element fails the comparison.
+#define _tst_decl_arr_assert_eq(assert_name, fmt_spec, type, cmp, cmp_text)\
+static int assert_name(\
+    const type * expr, const type * expected, size_t len,\
+    const char * filename, int linenum, const char * expr_str)\
+{\
+    for (size_t _i = 0; i < len; i++) {\
+        if (!cmp(expr[_i], expected[_i])) {\
+            _tst_print_assert_err(filename, linenum);\
+            _tst_perror(\
+                "Expected %s[%zu]="fmt_spec" to "cmp_text" "fmt_spec"\n",\
+                expr_str, expr[_i], expected[_i]);\
+            return 0;\
+        }\
     }\
-    fprintf( stderr, "}" );\
-} while( 0 )
+    return 1;\
+}
 
-#define _tst_assert_array_base( expr, expected, len, fmt_spec, type, cmp_arr, cmp_text ) do {\
-    type _expr = (expr);\
-    type _expected = (expected);\
-    bool _passed;\
-    cmp_arr( _expr, _expected, len, _passed );\
-    if( !_passed ) {\
-        fprintf(\
-            stderr,\
-            "Assert error in %s:%d: ",\
-            __FILE__, __LINE__\
-        );\
-        fprintf( stderr, "Expected %s=", #expr );\
-        _tst_print_array( _expr, len, fmt_spec );\
-        fprintf( stderr, " to "cmp_text" " );\
-        _tst_print_array( _expected, len, fmt_spec );\
-        fprintf( stderr, "\n" );\
-        _tst_assertion_stats.failed += 1;\
-    } else {\
-        _tst_assertion_stats.passed += 1;\
+// Generates forgiving assert definition for array types. Parameters still refer to scalar type
+// The assertion fails if all elements fail the comparison.
+#define _tst_decl_arr_assert_ne(assert_name, type, cmp, cmp_text)\
+static int assert_name(\
+    const type * expr, const type * expected, size_t len,\
+    const char * filename, int linenum, const char * expr_str, const char * expected_str)\
+{\
+    for (size_t _i = 0; i < len; i++) {\
+        if (cmp(expr[_i], expected[_i])) {\
+            return 1;\
+        }\
     }\
-} while( 0 )
+    _tst_print_assert_err(filename, linenum);\
+    _tst_perror("Expected %s to "cmp_text" %s\n", expr_str, expected_str);\
+    return 0;\
+}
 
-// Int asserts
-#define _tst_int_cmp( a, b ) (a == b)
+// Declares the eq and ne assertions for the specified type.
+// The cmp macro should test for equality.
+#define _tst_decl_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
+    _tst_decl_assert(_tst_concat(_tst_assert_eq, type_name), fmt_spec, type, cmp, "equal")\
+    _tst_decl_assert(_tst_concat(_tst_assert_ne, type_name), fmt_spec, type, !cmp, "not equal")
 
-#define tst_assert_int( expr, expected, cmp, cmp_text )\
-    _tst_assert_base( expr, expected, "%d", int, cmp, cmp_text )
+// Declares the less/greater than assertions for specified type. Only available for numerical types.
+// The cmp_gt and cmp_lt macros should test for greater than and less than.
+#define _tst_decl_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)\
+    _tst_decl_assert(\
+        _tst_concat(_tst_assert_gt, type_name), fmt_spec, type, cmp_gt, "greater than")\
+    _tst_decl_assert(\
+        _tst_concat(_tst_assert_ge, type_name), fmt_spec, type, !cmp_lt, "greater than or equal")\
+    _tst_decl_assert(\
+        _tst_concat(_tst_assert_lt, type_name), fmt_spec, type, cmp_lt, "less than")\
+    _tst_decl_assert(\
+        _tst_concat(_tst_assert_le, type_name), fmt_spec, type, !cmp_gt, "less than or equal")
 
-#define tst_assert_eq_int( expr, expected )\
-    tst_assert_int( expr, expected, _tst_int_cmp, "equal" ) 
+// Declares all 6 assertions for specified type. Only available for numerical types
+#define _tst_decl_all_asserts_for_type(type_name, fmt_spec, type, cmp, cmp_gt, cmp_lt)\
+    _tst_decl_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
+    _tst_decl_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)
 
-#define tst_assert_ne_int( expr, expected )\
-    tst_assert_int( expr, expected, !_tst_int_cmp, "not equal" ) 
+#define _tst_decl_arr_asserts_for_type(type_name, type, cmp_eq)\
+    _tst_decl_arr_assert_eq(_tst_concat(_tst_assert_eq_arr_, type_name), type, cmp_eq, "equal")\
+    _tst_decl_arr_assert_ne(_tst_concat(_tst_assert_ne_arr_, type_name), type, !cmp_eq, "not equal")
 
-// UInt asserts
-#define tst_assert_uint( expr, expected, cmp, cmp_text )\
-    _tst_assert_base( expr, expected, "%u", unsigned, cmp, cmp_text )
+// These comparison macros work for all numerical types, except for _eq, which doesn't work with floats
+#define _tst_int_cmp_eq(a, b) (a == b)
+#define _tst_int_cmp_gt(a, b) (a > b)
+#define _tst_int_cmp_lt(a, b) (a < b)
 
-#define tst_assert_eq_uint( expr, expected )\
-    tst_assert_uint( expr, expected, _tst_int_cmp, "equal" ) 
+_tst_decl_all_asserts_for_type(int, "%d", int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+_tst_decl_arr_asserts_for_type(int, int, _tst_int_cmp_eq)
 
-#define tst_assert_ne_uint( expr, expected )\
-    tst_assert_uint( expr, expected, !_tst_int_cmp, "not equal" ) 
+_tst_decl_all_asserts_for_type(uint, "%u", unsigned, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+_tst_decl_arr_asserts_for_type(uint, uint, _tst_int_cmp_eq)
 
-// Pointer asserts
-#define tst_assert_ptr( expr, expected, cmp, cmp_text )\
-    _tst_assert_base( expr, expected, "%p", void *, cmp, cmp_text )
+_tst_decl_all_asserts_for_type(
+    ptr, "%p", const void *, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+_tst_decl_arr_asserts_for_type(ptr, void *, _tst_int_cmp_eq)
 
-#define tst_assert_eq_ptr( expr, expected )\
-    tst_assert_ptr( expr, expected, _tst_int_cmp, "equal" ) 
+_tst_decl_all_asserts_for_type(char, "'%c'", char, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+_tst_decl_all_asserts_for_type(size, "%zu", size_t, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
 
-#define tst_assert_ne_ptr( expr, expected )\
-    tst_assert_ptr( expr, expected, !_tst_int_cmp, "not equal" ) 
+// These "long" asserts are for long long types
+_tst_decl_all_asserts_for_type(
+    long, "%lld", long long int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+_tst_decl_all_asserts_for_type(
+        ulong, "%llu", unsigned long long int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
 
-// Char asserts
-#define tst_assert_char( expr, expected, cmp, cmp_text )\
-    _tst_assert_base( expr, expected, "'%c'", char, cmp, cmp_text )
+// TODO double equality asserts, which are nontrivial
+_tst_decl_comparison_asserts_for_type(dbl, "%f", double, _tst_int_cmp_gt, _tst_int_cmp_lt)
 
-#define tst_assert_eq_char( expr, expected )\
-    tst_assert_char( expr, expected, _tst_int_cmp, "equal" ) 
+// String comparisons using strcmp
+#define _tst_str_cmp_eq(a, b) (strcmp(a, b) == 0)
+#define _tst_str_cmp_gt(a, b) (strcmp(a, b) > 0)
+#define _tst_str_cmp_lt(a, b) (strcmp(a, b) < 0)
 
-#define tst_assert_ne_char( expr, expected )\
-    tst_assert_char( expr, expected, !_tst_int_cmp, "not equal" ) 
-
-// Size_t asserts
-#define tst_assert_size( expr, expected, cmp, cmp_text )\
-    _tst_assert_base( expr, expected, "%zu", size_t, cmp, cmp_text )
-
-#define tst_assert_eq_size( expr, expected )\
-    tst_assert_size( expr, expected, _tst_int_cmp, "equal" ) 
-
-#define tst_assert_ne_size( expr, expected )\
-    tst_assert_size( expr, expected, !_tst_int_cmp, "not equal" ) 
-
-// String-type asserts
-#define _tst_str_cmp( a, b ) (strcmp( a, b ) == 0)
-
-#define tst_assert_str( expr, expected, cmp, cmp_text )\
-    _tst_assert_base( expr, expected, "\"%s\"", const char *, cmp, cmp_text )
-
-#define tst_assert_eq_str( expr, expected )\
-    tst_assert_str( expr, expected, _tst_str_cmp, "equal" )
-
-#define tst_assert_ne_str( expr, expected )\
-    tst_assert_str( expr, expected, !_tst_str_cmp, "not equal" )
+_tst_decl_all_asserts_for_type(
+    str, "\"%s\"", const char *, _tst_str_cmp_eq, _tst_str_cmp_gt, _tst_str_cmp_lt)
 
 // General array comparison macro for testing equality
 #define _tst_cmp_arr_base( cmp, a1, a2, len, eq_var ) do {\
