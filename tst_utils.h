@@ -2,26 +2,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <inttypes.h>
-
-struct _tst_assertion_stats_t {
-    unsigned passed;
-    unsigned failed;
-};
-
-struct _tst_test_stats_t {
-    unsigned passed;
-    unsigned failed;
-    unsigned skipped;
-};
-
-// Global test stat trackers used for final reporting
-static struct _tst_assertion_stats_t _tst_assertion_stats = {0};
-static struct _tst_test_stats_t _tst_test_stats = {0};
-// The pointer is guaranteed to point to global data, since the struct variable may be shadowed
-static struct _tst_assertion_stats_t * _g_tst_assertion_stats_ptr = &_tst_assertion_stats;
 
 // Default setup/teardown function, which does nothing and always succeeds
 int _tst_do_nothing( void ) { return 0; }
@@ -45,125 +25,93 @@ static _tst_hook_func_t _tst_g_teardown_ptr = &_tst_do_nothing;
 #define _tst_checkmark_line _tst_checkmark _tst_checkmark _tst_checkmark _tst_checkmark
 #define _tst_crossmark_line _tst_crossmark _tst_crossmark _tst_crossmark _tst_crossmark
 
-// Generates name of test functions. Used to generate function definitions and calls
-#define _tst_gen_name( name ) _tst_func_##name
-
-// Returns whether the test case or the suite is passing based on asserts.
-#define tst_passing() (_tst_assertion_stats.failed == 0)
-
-// Convenient if wrappers for determining test/fail
-#define tst_if_pass() if( tst_passing() )
-#define tst_if_fail() if( !tst_passing() )
-
-#define _tst_report_asserts()\
-    printf(\
-        "- Assertions: %u attempted, %u passed, %u failed\n",\
-        _tst_assertion_stats.passed + _tst_assertion_stats.failed,\
-        _tst_assertion_stats.passed, _tst_assertion_stats.failed\
-    );\
-
-// Only report tests if tests have actually been made and run
-#define _tst_report_tests() do {\
-    unsigned _tst_total_tests =\
-        _tst_test_stats.passed + _tst_test_stats.failed + _tst_test_stats.skipped;\
-    if( _tst_total_tests > 0 ) printf(\
-        "- Test cases: %u attemped, %u passed, %u failed, %u skipped\n",\
-        _tst_total_tests,\
-        _tst_test_stats.passed, _tst_test_stats.failed, _tst_test_stats.skipped\
-    );\
-} while( 0 )
-
-// Final reporting called from main to print all test results and return success code
-#define tst_report_results() do {\
-    printf( "\n" );\
-    if( tst_passing() ){\
-        printf( _tst_checkmark_line " Module %s PASSED! " _tst_checkmark_line "\n", __FILE__ );\
-    } else {\
-        printf( _tst_crossmark_line " Module %s FAILED! " _tst_crossmark_line "\n", __FILE__ );\
-    }\
-    _tst_report_tests();\
-    _tst_report_asserts();\
-    /* Since we're returning to shell, we return 0 if the tests are passing, 1 otherwise */\
-    return !tst_passing();\
-} while( 0 )
-
-// Sync the assert stats from within a test case to the global assert stats.
-// Should be updated for new assert stats. DON'T USE OUTSIDE TEST CASES
-#define _tst_sync() do {\
-    _g_tst_assertion_stats_ptr->passed += _tst_assertion_stats.passed;\
-    _g_tst_assertion_stats_ptr->failed += _tst_assertion_stats.failed;\
-} while( 0 )
-
-// Calls teardown, checks for failures, then updates the test counter before returning.
-// Called whenever we need to exit from the test
-#define _tst_exit( test_stat_field ) do {\
-    _tst_test_stats.test_stat_field += 1;\
-    int _tst_teardown_ret = (*_tst_g_teardown_ptr)();\
-    if( _tst_teardown_ret != 0 ){\
-        printf(\
-            _tst_crossmark " Warning: TEARDOWN FAILED with code %d, carrying on.\n",\
-            _tst_teardown_ret\
-        );\
-    }\
-    printf("\n");\
-    return;\
-} while( 0 )
-
-// Initializes a new test function. Must be matched by an END_TEST.
-// name =  unique identifier name of the test
-#define tst_begin_test( name ) void _tst_gen_name( name )( void )\
-{\
-    static struct _tst_assertion_stats_t _tst_assertion_stats = {0};\
-    const char * _tst_name = #name;\
-    int _tst_setup_ret = (*_tst_g_setup_ptr)();\
-    if( _tst_setup_ret != 0 ){\
-        printf(\
-            _tst_crossmark " Test case \"%s\" SETUP FAILED with code %d, ABORTING!\n",\
-            _tst_name, _tst_setup_ret\
-        );\
-        _tst_exit( skipped );\
-    }
-
-// Version of tst_begin_test that skips the whole test case.
-#define tst_begin_test_skip( name ) tst_begin_test( name )\
-    printf( _tst_circle " Test case \"%s\" SKIPPED!\n", _tst_name );\
-    _tst_exit( skipped );
-    
-// Prints result message depending on whether the test case passed or failed
-// and reports assert stats for this test
-#define tst_end_test()\
-    _tst_sync();\
-    if( tst_passing() ){\
-        printf( _tst_checkmark " Test case \"%s\" PASSED!\n", _tst_name );\
-        _tst_report_asserts();\
-        _tst_exit( passed );\
-    } else {\
-        printf( _tst_crossmark " Test case \"%s\" FAILED!\n", _tst_name );\
-        _tst_report_asserts();\
-        _tst_exit( failed );\
-    }\
+struct _tst_test_stats_t {
+    unsigned passed, failed;
 }
-
-// Aborts a test, which marks it as failed
-#define tst_abort_test() do {\
-    printf( _tst_crossmark " Test case \"%s\" ABORTED!\n", _tst_name );\
-    _tst_report_asserts();\
-    _tst_sync();\
-    _tst_exit( failed );\
-} while( 0 )
-
-// Abort test when failing
- #define tst_abort_if_failing() tst_if_fail() tst_abort_test()
-
-// Runs a test runner function of the specified name
-#define tst_run_test( name ) _tst_gen_name( name )()
+static struct _tst_test_stats_t _tst_test_stats = {0};
+static const unsigned _tst_indent_level = 0;
 
 #define _tst_concat(a, b) a##b
+// All user-defined test functions are prefixed with _tst_func_.
+#define _tst_test_name(name) _tst_concat(_tst_func_test_, name)
+#define _tst_suite_name(name) _tst_concat(_tst_func_suite_, name)
 
-#define _tst_perror(...) fprintf(stderr, __VA_ARGS__)
+// Print macros
+#define _tst_perror(...) fprintf(stderr, ...)
+#define _tst_print(...) printf(__VA_ARGS__)
 
-#define _tst_print_assert_err(filename, linenum)\
-    _tst_perror("Assert error in %s:%d: ", filename, linenum)
+// Prints current number of indents followed by formatted message.
+#define _tst_perror_line(...) do {\
+    for (unsigned _i = 0; _i < _tst_indent_level; _i++) {\
+        _tst_perror(" ");\
+    }\
+    _tst_perror(__VA_ARGS__);\
+} while (0)
+
+#define _tst_print_line(...) do {\
+    for (unsigned _i = 0; _i < _tst_indent_level; _i++) {\
+        _tst_print(" ");\
+    }\
+    _tst_print(__VA_ARGS__);\
+} while (0)
+
+// Returns 1 if tests fail, 0 if tests succeed
+static int tst_results()
+{
+    _tst_print("-------------------------------------------------------------------\n");
+    int passed = _tst_test_stats.failed != 0;
+    if (passed) {
+        _tst_print(_tst_checkmark_line);
+    } else {
+        _tst_print(_tst_crossmark_line);
+    }
+    _tst_print(" %u passed, %u failed!\n", _tst_test_stats.passed, _tst_test_stats.failed);
+    return 
+}
+
+#define tst_suite_header(name)\
+    struct _tst_test_stats_t _tst_suite_name(name) (unsigned indent)
+
+#define tst_decl_suite(name, ...)\
+tst_suite_header(name)\
+{\
+    const unsigned _tst_indent_level = indent;\
+    const int _is_suite = 1;\
+    struct _tst_test_stats_t _tst_test_stats = {0};\
+    __VA_ARGS__\
+_tst_test_failed:   /* Placeholder label so that asserts work inside suites */\
+    return _tst_test_stats;\
+}
+
+#define tst_suite(name) do {\
+    _tst_print_line("Suite %s:\n", #name);\
+    struct _tst_test_stats_t _stats = _tst_suite_name(name)(_tst_indent_level + 1);\
+    _tst_test_stats.passed += _stats.passed;\
+    _tst_test_stats.failed += _stats.failed;\
+} while(0)
+
+#define tst_test_header(name, params)\
+    static int _tst_test_name(name) params
+
+#define tst_decl_test(name, params, ...)\
+tst_test_header(name, params)\
+{\
+    const int _is_suite = 0;\
+    __VA_ARGS__\
+    return 1;\
+_tst_test_failed:   /* Assert macros jump to this location on failure */\
+    return 0;\
+}
+
+#define tst_test(name, msg, ...) do {\
+    if (!_tst_test_name(name)(__VA_ARGS__)) {\
+        _tst_perror_line("Test %s with args=(%s) failed at %s:%d!\n", msg, #__VA_ARGS__, __FILE__, __LINE__);\
+        _tst_test_stats.failed++;\
+    } else {\
+        _tst_print_line("Test %s passed at %s:%d!\n", msg, __FILE__, __LINE__);\
+        _tst_test_stats.passed++;\
+    }\
+} while(0)
 
 // Generates assertion function definition for the specified type as well as the
 // comparison macro and format specifiers used for that type
@@ -173,50 +121,13 @@ static int assert_name(\
     type expr, type expected, const char * filename, int linenum, const char * expr_str)\
 {\
     if(!cmp(expr, expected)){\
-        _tst_print_assert_err(filename, linenum);\
-        _tst_perror(\
-                "Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
-                expr_str, expr, expected);\
+        _tst_print_line_assert_err(filename, linenum);\
+        _tst_perror_line("Assert error at %s:%d: Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
+                filenam, linenum, expr_str, expr, expected);\
         return 0;\
     } else {\
         return 1;\
     }\
-}
-
-// Generates unforgiving assert definition for array types. Parameters still refer to scalar type
-// The assertion fails if any element fails the comparison.
-#define _tst_decl_arr_assert_eq(assert_name, fmt_spec, type, cmp, cmp_text)\
-static int assert_name(\
-    const type * expr, const type * expected, size_t len,\
-    const char * filename, int linenum, const char * expr_str)\
-{\
-    for (size_t _i = 0; i < len; i++) {\
-        if (!cmp(expr[_i], expected[_i])) {\
-            _tst_print_assert_err(filename, linenum);\
-            _tst_perror(\
-                "Expected %s[%zu]="fmt_spec" to "cmp_text" "fmt_spec"\n",\
-                expr_str, expr[_i], expected[_i]);\
-            return 0;\
-        }\
-    }\
-    return 1;\
-}
-
-// Generates forgiving assert definition for array types. Parameters still refer to scalar type
-// The assertion fails if all elements fail the comparison.
-#define _tst_decl_arr_assert_ne(assert_name, type, cmp, cmp_text)\
-static int assert_name(\
-    const type * expr, const type * expected, size_t len,\
-    const char * filename, int linenum, const char * expr_str, const char * expected_str)\
-{\
-    for (size_t _i = 0; i < len; i++) {\
-        if (cmp(expr[_i], expected[_i])) {\
-            return 1;\
-        }\
-    }\
-    _tst_print_assert_err(filename, linenum);\
-    _tst_perror("Expected %s to "cmp_text" %s\n", expr_str, expected_str);\
-    return 0;\
 }
 
 // Declares the eq and ne assertions for the specified type.
