@@ -146,8 +146,9 @@ _tst_all_assert_headers_for_type(str, const char *)
 #define _tst_assert_base(assert_name, expr, expected) do {\
     int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
     if (!_res) goto _tst_test_failed;\
-}
+} while (0)
 
+// All assert macros
 #define tst_assert_eq_int(expr, expected) _tst_assert_base(_tst_assert_eq_int, expr, expected)
 #define tst_assert_ne_int(expr, expected) _tst_assert_base(_tst_assert_ne_int, expr, expected)
 #define tst_assert_gt_int(expr, expected) _tst_assert_base(_tst_assert_gt_int, expr, expected)
@@ -196,4 +197,16 @@ _tst_all_assert_headers_for_type(str, const char *)
 #define tst_assert_lt_ulong(expr, expected) _tst_assert_base(_tst_assert_lt_ulong, expr, expected)
 #define tst_assert_ge_ulong(expr, expected) _tst_assert_base(_tst_assert_ge_ulong, expr, expected)
 #define tst_assert_lt_ulong(expr, expected) _tst_assert_base(_tst_assert_lt_ulong, expr, expected)
+
+#define tst_assert_gt_dbl(expr, expected) _tst_assert_base(_tst_assert_gt_dbl, expr, expected)
+#define tst_assert_lt_dbl(expr, expected) _tst_assert_base(_tst_assert_lt_dbl, expr, expected)
+#define tst_assert_ge_dbl(expr, expected) _tst_assert_base(_tst_assert_ge_dbl, expr, expected)
+#define tst_assert_lt_dbl(expr, expected) _tst_assert_base(_tst_assert_lt_dbl, expr, expected)
+
+#define tst_assert_eq_str(expr, expected) _tst_assert_base(_tst_assert_eq_str, expr, expected)
+#define tst_assert_ne_str(expr, expected) _tst_assert_base(_tst_assert_ne_str, expr, expected)
+#define tst_assert_gt_str(expr, expected) _tst_assert_base(_tst_assert_gt_str, expr, expected)
+#define tst_assert_lt_str(expr, expected) _tst_assert_base(_tst_assert_lt_str, expr, expected)
+#define tst_assert_ge_str(expr, expected) _tst_assert_base(_tst_assert_ge_str, expr, expected)
+#define tst_assert_lt_str(expr, expected) _tst_assert_base(_tst_assert_lt_str, expr, expected)
 
