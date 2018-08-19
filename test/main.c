@@ -111,9 +111,21 @@ tst_begin_test(dbl_asserts, void)
     tst_assert_le_dbl(0.5, 0.5);
 } tst_end_test
 
+tst_begin_test(divisible, int a, int b)
+{
+    tst_assert_eq_int(a % b, 0);
+} tst_end_test
+
+// Suites begin here
+
+tst_begin_suite(EMPTY)
+{
+} tst_end_suite
+
 tst_begin_suite(SUITE_WITH_ASSERT)
 {
     tst_assert_ne_int(0, 0);
+    tst_test_msg(divisible, "Should not be run", 3, 2);
 } tst_end_suite
 
 tst_begin_suite(ASSERTS)
@@ -129,10 +141,19 @@ tst_begin_suite(ASSERTS)
     tst_test(dbl_asserts,);
 } tst_end_suite
 
+tst_begin_suite(PARAMETERS)
+{
+    tst_test_msg(divisible, "2 div 1", 2, 1);
+    tst_test_msg(divisible, "2 div 2", 2, 2);
+    tst_test_msg(divisible, "4 div 1", 4, 1);
+} tst_end_suite
+
 tst_begin_suite(ALL_SUITES)
 {
+    tst_suite(EMPTY);
     tst_suite(ASSERTS);
     tst_suite(SUITE_WITH_ASSERT);
+    tst_suite(PARAMETERS);
 } tst_end_suite
 
 int main(void)
