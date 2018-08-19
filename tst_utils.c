@@ -1,7 +1,8 @@
 #include <string.h>
 #include "tst_utils.h"
 
-struct _tst_test_stats_t _tst_test_stats = {0};
+unsigned _tst_stat_passed = 0;
+unsigned _tst_stat_failed = 0;
 const unsigned _tst_indent_level = 0;
 
 // Returns 1 if tests fail, 0 if tests succeed. Used to report test results
