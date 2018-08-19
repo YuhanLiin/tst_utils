@@ -44,16 +44,22 @@ int tst_results(void);
 /************************************ Suite declaration macros **********************************/
 
 #define tst_suite_header(name)\
-    void _tst_suite_name(name) (unsigned indent)
+    void _tst_suite_name(name) (const unsigned _tst_indent_level)
 
-#define tst_decl_suite(name, ...)\
+// Declares a test suite with a tst_teardown label that the code will jump to on assert failure
+// Allows cleanup code to run when an assert causes an exit
+#define tst_decl_suite_teardown(name, ...)\
 tst_suite_header(name)\
 {\
-    const unsigned _tst_indent_level = indent;\
-    const int _is_suite = 1;\
     __VA_ARGS__\
-_tst_test_failed:   /* Placeholder label so that asserts work inside suites */\
+    return;\
+_tst_test_failed:\
+    goto tst_teardown;\
+    (void)_tst_indent_level;\
 }
+
+// Declares test suite without tst_teardown label, so failed asserts cause the code to just exit
+#define tst_decl_suite(name, ...) tst_decl_suite_teardown(name, __VA_ARGS__ tst_teardown:)
 
 #define tst_suite(name) do {\
     _tst_print_line("Suite %s:\n", #name);\
@@ -65,17 +71,23 @@ _tst_test_failed:   /* Placeholder label so that asserts work inside suites */\
 #define tst_test_header(name, params)\
     static int _tst_test_name(name) params
 
-#define tst_decl_test(name, params, ...)\
+// Declares test case with a tst_teardown label to handle assert failures
+#define tst_decl_test_teardown(name, params, ...)\
 tst_test_header(name, params)\
 {\
-    const int _is_suite = 0;\
+    int _result = 1;\
     __VA_ARGS__\
-    return 1;\
-_tst_test_failed:   /* Assert macros jump to this location on failure */\
-    return 0;\
+    return _result;\
+_tst_test_failed:\
+    _result = 0;\
+    goto tst_teardown;\
 }
 
-#define tst_test(name, msg, ...) do {\
+// Declares test case without tst_teardown label
+#define tst_decl_test(name, params, ...) tst_decl_test_teardown(name, params, __VA_ARGS__ tst_teardown:)
+
+// Runs a test case with a custom message to print with the result
+#define tst_test_msg(name, msg, ...) do {\
     if (!_tst_test_name(name)(__VA_ARGS__)) {\
         _tst_print_line(\
             _tst_crossmark"Test %s with args=(%s) failed at %s:%d!\n",\
@@ -87,6 +99,9 @@ _tst_test_failed:   /* Assert macros jump to this location on failure */\
         _tst_stat_passed++;\
     }\
 } while(0)
+
+// Like the above, but uses the name of the test in place of the custom message
+#define tst_test(name, ...) tst_test_msg(name, #name, __VA_ARGS__)
 
 /************************************ Assert headers **********************************/
 
@@ -124,17 +139,10 @@ _tst_all_assert_headers_for_type(str, const char *)
     
 /************************************ Assert macros **********************************/
 
-// The behaviour of assertions differs when it's called from a suite or test case.
-// In a suite, a failed assert functions like a failed test
-// In a test case, a failed assert causes the code to jump to the end of the test.
+// On assert failure, jump to end of test/suite
 #define _tst_assert_base(assert_name, expr, expected) do {\
     int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
-    if (_is_suite) {\
-        if (_res) _tst_stat_passed;\
-        else _tst_stat_failed++;\
-    } else {\
-        if (!_res) goto _tst_test_failed;\
-    }\
+    if (!_res) goto _tst_test_failed;\
 }
 
 #define tst_assert_eq_int(expr, expected) _tst_assert_base(_tst_assert_eq_int, expr, expected)
