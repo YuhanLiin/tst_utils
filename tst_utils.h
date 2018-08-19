@@ -105,7 +105,7 @@ _tst_test_failed:\
         _tst_stat_failed++;\
     } else {\
         _tst_print_line(\
-            _tst_green(_tst_checkmark" Test %s passed at %s:%d!\n"), msg, __FILE__, __LINE__);\
+            _tst_green(_tst_checkmark" Test \"%s\" passed at %s:%d!\n"), msg, __FILE__, __LINE__);\
         _tst_stat_passed++;\
     }\
 } while(0)
@@ -162,59 +162,59 @@ _tst_all_assert_headers_for_type(str, const char *)
 #define tst_assert_gt_int(expr, expected) _tst_assert_base(_tst_assert_gt_int, expr, expected)
 #define tst_assert_lt_int(expr, expected) _tst_assert_base(_tst_assert_lt_int, expr, expected)
 #define tst_assert_ge_int(expr, expected) _tst_assert_base(_tst_assert_ge_int, expr, expected)
-#define tst_assert_lt_int(expr, expected) _tst_assert_base(_tst_assert_lt_int, expr, expected)
+#define tst_assert_le_int(expr, expected) _tst_assert_base(_tst_assert_le_int, expr, expected)
 
 #define tst_assert_eq_uint(expr, expected) _tst_assert_base(_tst_assert_eq_uint, expr, expected)
 #define tst_assert_ne_uint(expr, expected) _tst_assert_base(_tst_assert_ne_uint, expr, expected)
 #define tst_assert_gt_uint(expr, expected) _tst_assert_base(_tst_assert_gt_uint, expr, expected)
 #define tst_assert_lt_uint(expr, expected) _tst_assert_base(_tst_assert_lt_uint, expr, expected)
 #define tst_assert_ge_uint(expr, expected) _tst_assert_base(_tst_assert_ge_uint, expr, expected)
-#define tst_assert_lt_uint(expr, expected) _tst_assert_base(_tst_assert_lt_uint, expr, expected)
+#define tst_assert_le_uint(expr, expected) _tst_assert_base(_tst_assert_le_uint, expr, expected)
 
 #define tst_assert_eq_ptr(expr, expected) _tst_assert_base(_tst_assert_eq_ptr, expr, expected)
 #define tst_assert_ne_ptr(expr, expected) _tst_assert_base(_tst_assert_ne_ptr, expr, expected)
 #define tst_assert_gt_ptr(expr, expected) _tst_assert_base(_tst_assert_gt_ptr, expr, expected)
 #define tst_assert_lt_ptr(expr, expected) _tst_assert_base(_tst_assert_lt_ptr, expr, expected)
 #define tst_assert_ge_ptr(expr, expected) _tst_assert_base(_tst_assert_ge_ptr, expr, expected)
-#define tst_assert_lt_ptr(expr, expected) _tst_assert_base(_tst_assert_lt_ptr, expr, expected)
+#define tst_assert_le_ptr(expr, expected) _tst_assert_base(_tst_assert_le_ptr, expr, expected)
 
 #define tst_assert_eq_char(expr, expected) _tst_assert_base(_tst_assert_eq_char, expr, expected)
 #define tst_assert_ne_char(expr, expected) _tst_assert_base(_tst_assert_ne_char, expr, expected)
 #define tst_assert_gt_char(expr, expected) _tst_assert_base(_tst_assert_gt_char, expr, expected)
 #define tst_assert_lt_char(expr, expected) _tst_assert_base(_tst_assert_lt_char, expr, expected)
 #define tst_assert_ge_char(expr, expected) _tst_assert_base(_tst_assert_ge_char, expr, expected)
-#define tst_assert_lt_char(expr, expected) _tst_assert_base(_tst_assert_lt_char, expr, expected)
+#define tst_assert_le_char(expr, expected) _tst_assert_base(_tst_assert_le_char, expr, expected)
 
 #define tst_assert_eq_size(expr, expected) _tst_assert_base(_tst_assert_eq_size, expr, expected)
 #define tst_assert_ne_size(expr, expected) _tst_assert_base(_tst_assert_ne_size, expr, expected)
 #define tst_assert_gt_size(expr, expected) _tst_assert_base(_tst_assert_gt_size, expr, expected)
 #define tst_assert_lt_size(expr, expected) _tst_assert_base(_tst_assert_lt_size, expr, expected)
 #define tst_assert_ge_size(expr, expected) _tst_assert_base(_tst_assert_ge_size, expr, expected)
-#define tst_assert_lt_size(expr, expected) _tst_assert_base(_tst_assert_lt_size, expr, expected)
+#define tst_assert_le_size(expr, expected) _tst_assert_base(_tst_assert_le_size, expr, expected)
 
 #define tst_assert_eq_long(expr, expected) _tst_assert_base(_tst_assert_eq_long, expr, expected)
 #define tst_assert_ne_long(expr, expected) _tst_assert_base(_tst_assert_ne_long, expr, expected)
 #define tst_assert_gt_long(expr, expected) _tst_assert_base(_tst_assert_gt_long, expr, expected)
 #define tst_assert_lt_long(expr, expected) _tst_assert_base(_tst_assert_lt_long, expr, expected)
 #define tst_assert_ge_long(expr, expected) _tst_assert_base(_tst_assert_ge_long, expr, expected)
-#define tst_assert_lt_long(expr, expected) _tst_assert_base(_tst_assert_lt_long, expr, expected)
+#define tst_assert_le_long(expr, expected) _tst_assert_base(_tst_assert_le_long, expr, expected)
 
 #define tst_assert_eq_ulong(expr, expected) _tst_assert_base(_tst_assert_eq_ulong, expr, expected)
 #define tst_assert_ne_ulong(expr, expected) _tst_assert_base(_tst_assert_ne_ulong, expr, expected)
 #define tst_assert_gt_ulong(expr, expected) _tst_assert_base(_tst_assert_gt_ulong, expr, expected)
 #define tst_assert_lt_ulong(expr, expected) _tst_assert_base(_tst_assert_lt_ulong, expr, expected)
 #define tst_assert_ge_ulong(expr, expected) _tst_assert_base(_tst_assert_ge_ulong, expr, expected)
-#define tst_assert_lt_ulong(expr, expected) _tst_assert_base(_tst_assert_lt_ulong, expr, expected)
+#define tst_assert_le_ulong(expr, expected) _tst_assert_base(_tst_assert_le_ulong, expr, expected)
 
 #define tst_assert_gt_dbl(expr, expected) _tst_assert_base(_tst_assert_gt_dbl, expr, expected)
 #define tst_assert_lt_dbl(expr, expected) _tst_assert_base(_tst_assert_lt_dbl, expr, expected)
 #define tst_assert_ge_dbl(expr, expected) _tst_assert_base(_tst_assert_ge_dbl, expr, expected)
-#define tst_assert_lt_dbl(expr, expected) _tst_assert_base(_tst_assert_lt_dbl, expr, expected)
+#define tst_assert_le_dbl(expr, expected) _tst_assert_base(_tst_assert_le_dbl, expr, expected)
 
 #define tst_assert_eq_str(expr, expected) _tst_assert_base(_tst_assert_eq_str, expr, expected)
 #define tst_assert_ne_str(expr, expected) _tst_assert_base(_tst_assert_ne_str, expr, expected)
 #define tst_assert_gt_str(expr, expected) _tst_assert_base(_tst_assert_gt_str, expr, expected)
 #define tst_assert_lt_str(expr, expected) _tst_assert_base(_tst_assert_lt_str, expr, expected)
 #define tst_assert_ge_str(expr, expected) _tst_assert_base(_tst_assert_ge_str, expr, expected)
-#define tst_assert_lt_str(expr, expected) _tst_assert_base(_tst_assert_lt_str, expr, expected)
+#define tst_assert_le_str(expr, expected) _tst_assert_base(_tst_assert_le_str, expr, expected)
 
