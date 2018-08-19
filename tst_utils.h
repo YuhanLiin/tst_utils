@@ -29,14 +29,14 @@ extern const unsigned _tst_indent_level;
 // Prints current number of indents followed by formatted message.
 #define _tst_perror_line(...) do {\
     for (unsigned _i = 0; _i < _tst_indent_level; _i++) {\
-        _tst_perror(" ");\
+        _tst_perror("    ");\
     }\
     _tst_perror(__VA_ARGS__);\
 } while (0)
 
 #define _tst_print_line(...) do {\
     for (unsigned _i = 0; _i < _tst_indent_level; _i++) {\
-        _tst_print(" ");\
+        _tst_print("    ");\
     }\
     _tst_print(__VA_ARGS__);\
 } while (0)
@@ -49,17 +49,21 @@ int tst_results(void);
 #define tst_suite_header(name)\
     void _tst_suite_name(name) (const unsigned _tst_indent_level)
 
-// Declares a test suite with a tst_teardown label that the code will jump to on assert failure
-// Allows cleanup code to run when an assert causes an exit
-#define tst_decl_suite_teardown(name, ...)\
+// Begins a test suite
+#define tst_begin_suite(name)\
 tst_suite_header(name)\
 {\
-    __VA_ARGS__\
+
+// Ends a suite expecting a tst_teardown label in the suite body for handling cleanup
+#define tst_end_suite_teardown\
     return;\
+    goto _tst_test_failed;  /* Suppress unused label warning */\
 _tst_test_failed:\
     goto tst_teardown;\
     (void)_tst_indent_level;\
 }
+
+#define tst_end_suite tst_teardown: tst_end_suite_teardown
 
 // Declares test suite without tst_teardown label, so failed asserts cause the code to just exit
 #define tst_decl_suite(name, ...) tst_decl_suite_teardown(name, __VA_ARGS__ tst_teardown:)
@@ -71,34 +75,37 @@ _tst_test_failed:\
 
 /************************************ Test declaration macros **********************************/
 
-#define tst_test_header(name, params)\
-    static int _tst_test_name(name) params
+#define tst_test_header(name, ...)\
+    static int _tst_test_name(name)(__VA_ARGS__)
 
-// Declares test case with a tst_teardown label to handle assert failures
-#define tst_decl_test_teardown(name, params, ...)\
-tst_test_header(name, params)\
+// Forms beginning of a test case
+#define tst_begin_test(name, ...)\
+tst_test_header(name, __VA_ARGS__)\
 {\
-    int _result = 1;\
-    __VA_ARGS__\
+    int _result = 1;
+
+// Ends a test case. Expect a tst_teardown label in the above code to preceed cleanup code
+#define tst_end_test_teardown\
     return _result;\
+    goto _tst_test_failed;  /* Suppress unused label warning */\
 _tst_test_failed:\
     _result = 0;\
     goto tst_teardown;\
 }
 
-// Declares test case without tst_teardown label
-#define tst_decl_test(name, params, ...) tst_decl_test_teardown(name, params, __VA_ARGS__ tst_teardown:)
+// Ends test case without expecting tst_teardown label 
+#define tst_end_test tst_teardown: tst_end_test_teardown
 
 // Runs a test case with a custom message to print with the result
 #define tst_test_msg(name, msg, ...) do {\
     if (!_tst_test_name(name)(__VA_ARGS__)) {\
         _tst_print_line(\
-            _tst_red(_tst_crossmark"Test %s with args=(%s) failed at %s:%d!\n"),\
+            _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
             msg, #__VA_ARGS__, __FILE__, __LINE__);\
         _tst_stat_failed++;\
     } else {\
         _tst_print_line(\
-            _tst_green(_tst_checkmark"Test %s passed at %s:%d!\n"), msg, __FILE__, __LINE__);\
+            _tst_green(_tst_checkmark" Test %s passed at %s:%d!\n"), msg, __FILE__, __LINE__);\
         _tst_stat_passed++;\
     }\
 } while(0)
