@@ -116,10 +116,11 @@ _tst_test_failed:\
 /************************************ Assert headers **********************************/
 
 // Generates the signature of a assertion function based on its type
-// The last three args of the function will be passed in via the macro
+// The last four args of the function will be passed in via the macro
 #define _tst_assert_header(assert_name, type)\
 int assert_name(\
-    type expr, type expected, const char * filename, int linenum, const char * expr_str)
+    type expr, type expected,\
+    const char * filename, int linenum, const char * expr_str, const unsigned _tst_indent_level)
 
 // Header generation macros mirror the assert definition macros in the source file
 #define _tst_equality_assert_headers_for_type(type_name, type)\
@@ -151,7 +152,7 @@ _tst_all_assert_headers_for_type(str, const char *)
 
 // On assert failure, jump to end of test/suite
 #define _tst_assert_base(assert_name, expr, expected) do {\
-    int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
+    int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr, _tst_indent_level);\
     if (!_res) goto _tst_test_failed;\
 } while (0)
 
