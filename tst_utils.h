@@ -4,15 +4,18 @@
 #include <string.h>
 
 // Declares global state variables
-extern unsigned _tst_stat_passed = 0;
-extern unsigned _tst_stat_failed = 0;
-extern const unsigned _tst_indent_level = 0;
+extern unsigned _tst_stat_passed;
+extern unsigned _tst_stat_failed;
+extern const unsigned _tst_indent_level;
 
 // Symbols
 #define _tst_checkmark "\u2713"
 #define _tst_crossmark "\u2717"
 #define _tst_checkmark_line _tst_checkmark _tst_checkmark _tst_checkmark _tst_checkmark
 #define _tst_crossmark_line _tst_crossmark _tst_crossmark _tst_crossmark _tst_crossmark
+
+#define _tst_red(txt) "\x1b[31m" txt "\x1b[0m"
+#define _tst_green(txt) "\x1b[32m" txt "\x1b[0m"
 
 #define _tst_concat(a, b) a##b
 // All user-defined test functions are prefixed with _tst_func_.
@@ -90,12 +93,12 @@ _tst_test_failed:\
 #define tst_test_msg(name, msg, ...) do {\
     if (!_tst_test_name(name)(__VA_ARGS__)) {\
         _tst_print_line(\
-            _tst_crossmark"Test %s with args=(%s) failed at %s:%d!\n",\
+            _tst_red(_tst_crossmark"Test %s with args=(%s) failed at %s:%d!\n"),\
             msg, #__VA_ARGS__, __FILE__, __LINE__);\
         _tst_stat_failed++;\
     } else {\
         _tst_print_line(\
-            _tst_checkmark"Test %s passed at %s:%d!\n", msg, __FILE__, __LINE__);\
+            _tst_green(_tst_checkmark"Test %s passed at %s:%d!\n"), msg, __FILE__, __LINE__);\
         _tst_stat_passed++;\
     }\
 } while(0)

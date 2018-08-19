@@ -9,14 +9,11 @@ const unsigned _tst_indent_level = 0;
 int tst_results(void)
 {
     _tst_print("-------------------------------------------------------------------\n");
-    int passed = _tst_test_stats.failed != 0;
-    if (passed) {
-        _tst_print(_tst_checkmark_line);
-    } else {
-        _tst_print(_tst_crossmark_line);
-    }
-    _tst_print(" %u passed, %u failed!\n", _tst_test_stats.passed, _tst_test_stats.failed);
-    return passed;
+    int passed = _tst_stat_failed != 0;
+    const char * symbol =
+        passed ? _tst_green(_tst_checkmark_line) : _tst_red(_tst_crossmark_line);
+    _tst_print("%s %u passed, %u failed!\n", symbol, _tst_stat_passed, _tst_stat_failed);
+    return !passed;
 }
 
 /************************************ Assert definitions **********************************/
