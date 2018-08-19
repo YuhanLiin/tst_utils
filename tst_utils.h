@@ -6,7 +6,7 @@
 // Declares global state variables
 extern unsigned _tst_stat_passed;
 extern unsigned _tst_stat_failed;
-extern const unsigned _tst_indent_level;
+extern unsigned _tst_indent_level;
 
 // Symbols
 #define _tst_checkmark "\u2713"
@@ -47,7 +47,7 @@ int tst_results(void);
 /************************************ Suite declaration macros **********************************/
 
 #define tst_suite_header(name)\
-    void _tst_suite_name(name) (const unsigned _tst_indent_level)
+    void _tst_suite_name(name)(void)
 
 // Begins a test suite
 #define tst_begin_suite(name)\
@@ -60,7 +60,6 @@ tst_suite_header(name)\
     goto _tst_test_failed;  /* Suppress unused label warning */\
 _tst_test_failed:\
     goto tst_teardown;\
-    (void)_tst_indent_level;\
 }
 
 #define tst_end_suite tst_teardown: tst_end_suite_teardown
@@ -70,7 +69,9 @@ _tst_test_failed:\
 
 #define tst_suite(name) do {\
     _tst_print_line("Suite %s:\n", #name);\
-    _tst_suite_name(name)(_tst_indent_level + 1);\
+    _tst_indent_level++;\
+    _tst_suite_name(name)();\
+    _tst_indent_level--;\
 } while(0)
 
 /************************************ Test declaration macros **********************************/
@@ -120,7 +121,7 @@ _tst_test_failed:\
 #define _tst_assert_header(assert_name, type)\
 int assert_name(\
     type expr, type expected,\
-    const char * filename, int linenum, const char * expr_str, const unsigned _tst_indent_level)
+    const char * filename, int linenum, const char * expr_str) 
 
 // Header generation macros mirror the assert definition macros in the source file
 #define _tst_equality_assert_headers_for_type(type_name, type)\
@@ -152,7 +153,7 @@ _tst_all_assert_headers_for_type(str, const char *)
 
 // On assert failure, jump to end of test/suite
 #define _tst_assert_base(assert_name, expr, expected) do {\
-    int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr, _tst_indent_level);\
+    int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
     if (!_res) goto _tst_test_failed;\
 } while (0)
 

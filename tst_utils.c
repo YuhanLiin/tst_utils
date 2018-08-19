@@ -3,7 +3,7 @@
 
 unsigned _tst_stat_passed = 0;
 unsigned _tst_stat_failed = 0;
-const unsigned _tst_indent_level = 0;
+unsigned _tst_indent_level = 0;
 
 // Returns 1 if tests fail, 0 if tests succeed. Used to report test results
 int tst_results(void)

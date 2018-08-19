@@ -16,6 +16,18 @@ tst_begin_test(int_asserts, void)
     tst_assert_le_int(0, 0);
 } tst_end_test
 
+tst_begin_test(long_asserts, void)
+{
+    tst_assert_eq_int(-1, -1);
+    tst_assert_ne_int(-2, -1);
+    tst_assert_le_int(-2, -1);
+    tst_assert_lt_int(-2, -1);
+    tst_assert_ge_int(-2, -4);
+    tst_assert_gt_int(-2, -4);
+    tst_assert_ge_int(0, 0);
+    tst_assert_le_int(0, 0);
+} tst_end_test
+
 tst_begin_test(divisible, int a, int d)
 {
     tst_assert_eq_int(a % d, 0);
