@@ -25,7 +25,8 @@ int tst_results(void)
 _tst_assert_header(assert_name, type)\
 {\
     if(!cmp(expr, expected)){\
-        _tst_perror_line("Assert error at %s:%d: Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
+        _tst_perror_line(\
+                _tst_red("") "Assert error at %s:%d: Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
                 filename, linenum, expr_str, expr, expected);\
         return 0;\
     } else {\

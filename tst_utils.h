@@ -102,11 +102,12 @@ _tst_test_failed:\
     if (!_tst_test_name(name)(__VA_ARGS__)) {\
         _tst_print_line(\
             _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
-            msg, #__VA_ARGS__, __FILE__, __LINE__);\
+                msg, #__VA_ARGS__, __FILE__, __LINE__);\
         _tst_stat_failed++;\
     } else {\
         _tst_print_line(\
-            _tst_green(_tst_checkmark" Test \"%s\" passed at %s:%d!\n"), msg, __FILE__, __LINE__);\
+            _tst_green(_tst_checkmark" Test \"%s\" passed at %s:%d!\n"),\
+                msg, __FILE__, __LINE__);\
         _tst_stat_passed++;\
     }\
 } while(0)
