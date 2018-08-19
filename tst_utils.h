@@ -3,33 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 
-// Default setup/teardown function, which does nothing and always succeeds
-int _tst_do_nothing( void ) { return 0; }
-
-// Function ptrs for setup and teardown
-// Takes no args, returns 0 for sucess, fail otherwise
-typedef int ( *_tst_hook_func_t )( void );
-static _tst_hook_func_t _tst_g_setup_ptr = &_tst_do_nothing;
-static _tst_hook_func_t _tst_g_teardown_ptr = &_tst_do_nothing;
-
-// Macros for setting/unsetting setup and teardown functions
-#define tst_set_setup( func ) (_tst_g_setup_ptr = &func)
-#define tst_set_teardown( func ) (_tst_g_teardown_ptr = &func)
-#define tst_unset_setup() (_tst_g_setup_ptr = &_tst_do_nothing)
-#define tst_unset_teardown() (_tst_g_teardown_ptr = &_tst_do_nothing)
-
 // Symbols
 #define _tst_checkmark "\u2713"
 #define _tst_crossmark "\u2717"
-#define _tst_circle "\u25CB"
 #define _tst_checkmark_line _tst_checkmark _tst_checkmark _tst_checkmark _tst_checkmark
 #define _tst_crossmark_line _tst_crossmark _tst_crossmark _tst_crossmark _tst_crossmark
 
 struct _tst_test_stats_t {
     unsigned passed, failed;
-}
-static struct _tst_test_stats_t _tst_test_stats = {0};
-static const unsigned _tst_indent_level = 0;
+};
 
 #define _tst_concat(a, b) a##b
 // All user-defined test functions are prefixed with _tst_func_.
@@ -37,7 +19,7 @@ static const unsigned _tst_indent_level = 0;
 #define _tst_suite_name(name) _tst_concat(_tst_func_suite_, name)
 
 // Print macros
-#define _tst_perror(...) fprintf(stderr, ...)
+#define _tst_perror(...) fprintf(stderr, __VA_ARGS__)
 #define _tst_print(...) printf(__VA_ARGS__)
 
 // Prints current number of indents followed by formatted message.
@@ -55,19 +37,8 @@ static const unsigned _tst_indent_level = 0;
     _tst_print(__VA_ARGS__);\
 } while (0)
 
-// Returns 1 if tests fail, 0 if tests succeed
-static int tst_results()
-{
-    _tst_print("-------------------------------------------------------------------\n");
-    int passed = _tst_test_stats.failed != 0;
-    if (passed) {
-        _tst_print(_tst_checkmark_line);
-    } else {
-        _tst_print(_tst_crossmark_line);
-    }
-    _tst_print(" %u passed, %u failed!\n", _tst_test_stats.passed, _tst_test_stats.failed);
-    return 
-}
+// Returns 1 if tests fail, 0 if tests succeed. Used to report test results
+int tst_results(void);
 
 /************************************ Suite declaration macros **********************************/
 
@@ -117,79 +88,40 @@ _tst_test_failed:   /* Assert macros jump to this location on failure */\
     }\
 } while(0)
 
-/************************************ Assert declarations **********************************/
+/************************************ Assert headers **********************************/
 
-// Generates assertion function definition for the specified type as well as the
-// comparison macro and format specifiers used for that type
+// Generates the signature of a assertion function based on its type
 // The last three args of the function will be passed in via the macro
-#define _tst_decl_assert(assert_name, fmt_spec, type, cmp, cmp_text)\
-static int assert_name(\
-    type expr, type expected, const char * filename, int linenum, const char * expr_str)\
-{\
-    if(!cmp(expr, expected)){\
-        _tst_print_line_assert_err(filename, linenum);\
-        _tst_perror_line("Assert error at %s:%d: Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
-                filename, linenum, expr_str, expr, expected);\
-        return 0;\
-    } else {\
-        return 1;\
-    }\
-}
+#define _tst_assert_header(assert_name, type)\
+int assert_name(\
+    type expr, type expected, const char * filename, int linenum, const char * expr_str)
 
-// Declares the eq and ne assertions for the specified type.
-// The cmp macro should test for equality.
-#define _tst_decl_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
-    _tst_decl_assert(_tst_concat(_tst_assert_eq_, type_name), fmt_spec, type, cmp, "equal")\
-    _tst_decl_assert(_tst_concat(_tst_assert_ne_, type_name), fmt_spec, type, !cmp, "not equal")
+// Header generation macros mirror the assert definition macros in the source file
+#define _tst_equality_assert_headers_for_type(type_name, type)\
+    _tst_assert_header(_tst_concat(_tst_assert_eq_, type_name), type);\
+    _tst_assert_header(_tst_concat(_tst_assert_ne_, type_name), type);
 
-// Declares the less/greater than assertions for specified type. Only available for numerical types.
-// The cmp_gt and cmp_lt macros should test for greater than and less than.
-#define _tst_decl_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)\
-    _tst_decl_assert(\
-        _tst_concat(_tst_assert_gt_, type_name), fmt_spec, type, cmp_gt, "greater than")\
-    _tst_decl_assert(\
-        _tst_concat(_tst_assert_ge_, type_name), fmt_spec, type, !cmp_lt, "greater than or equal")\
-    _tst_decl_assert(\
-        _tst_concat(_tst_assert_lt_, type_name), fmt_spec, type, cmp_lt, "less than")\
-    _tst_decl_assert(\
-        _tst_concat(_tst_assert_le_, type_name), fmt_spec, type, !cmp_gt, "less than or equal")
+#define _tst_comparison_assert_headers_for_type(type_name, type)\
+    _tst_assert_header(_tst_concat(_tst_assert_gt_, type_name), type);\
+    _tst_assert_header(_tst_concat(_tst_assert_ge_, type_name), type);\
+    _tst_assert_header(_tst_concat(_tst_assert_lt_, type_name), type);\
+    _tst_assert_header(_tst_concat(_tst_assert_le_, type_name), type);
 
-// Declares all 6 assertions for specified type. Only available for numerical types
-#define _tst_decl_all_asserts_for_type(type_name, fmt_spec, type, cmp, cmp_gt, cmp_lt)\
-    _tst_decl_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
-    _tst_decl_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)
+#define _tst_all_assert_headers_for_type(type_name, type)\
+    _tst_equality_assert_headers_for_type(type_name, type)\
+    _tst_comparison_assert_headers_for_type(type_name, type)
 
-// These comparison macros work for all numerical types, except for _eq, which doesn't work with floats
-#define _tst_int_cmp_eq(a, b) (a == b)
-#define _tst_int_cmp_gt(a, b) (a > b)
-#define _tst_int_cmp_lt(a, b) (a < b)
-
-_tst_decl_all_asserts_for_type(int, "%d", int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-_tst_decl_all_asserts_for_type(uint, "%u", unsigned, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-
-_tst_decl_all_asserts_for_type(
-    ptr, "%p", const void *, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-
-_tst_decl_all_asserts_for_type(char, "'%c'", char, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-_tst_decl_all_asserts_for_type(size, "%zu", size_t, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-
-// These "long" asserts are for long long types
-_tst_decl_all_asserts_for_type(
-    long, "%lld", long long int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-_tst_decl_all_asserts_for_type(
-    ulong, "%llu", unsigned long long int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-
-// TODO double equality asserts, which are nontrivial
-_tst_decl_comparison_asserts_for_type(dbl, "%f", double, _tst_int_cmp_gt, _tst_int_cmp_lt)
-
-// String comparisons using strcmp
-#define _tst_str_cmp_eq(a, b) (strcmp(a, b) == 0)
-#define _tst_str_cmp_gt(a, b) (strcmp(a, b) > 0)
-#define _tst_str_cmp_lt(a, b) (strcmp(a, b) < 0)
-
-_tst_decl_all_asserts_for_type(
-    str, "\"%s\"", const char *, _tst_str_cmp_eq, _tst_str_cmp_gt, _tst_str_cmp_lt)
-
+// The actual headers
+_tst_all_assert_headers_for_type(int, int)
+_tst_all_assert_headers_for_type(uint, unsigned)
+_tst_all_assert_headers_for_type(ptr, const void *)
+_tst_all_assert_headers_for_type(char, char)
+_tst_all_assert_headers_for_type(size, size_t)
+_tst_all_assert_headers_for_type(long, long long int)
+_tst_all_assert_headers_for_type(ulong, unsigned long long int)
+_tst_comparison_assert_headers_for_type(dbl, double)
+_tst_all_assert_headers_for_type(str, const char *)
+    
 /************************************ Assert macros **********************************/
 
 // The behaviour of assertions differs when it's called from a suite or test case.
