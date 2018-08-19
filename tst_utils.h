@@ -152,10 +152,13 @@ _tst_all_assert_headers_for_type(str, const char *)
     
 /************************************ Assert macros **********************************/
 
+// Aborts the test/suite. When used in a test, the test is considered failed
+#define tst_abort() goto _tst_test_failed
+
 // On assert failure, jump to end of test/suite
 #define _tst_assert_base(assert_name, expr, expected) do {\
     int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
-    if (!_res) goto _tst_test_failed;\
+    if (!_res) tst_abort();\
 } while (0)
 
 // All assert macros
