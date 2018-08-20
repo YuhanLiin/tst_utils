@@ -11,17 +11,32 @@ BDIR:=build
 OBJ:=$(patsubst $(TST_DIR)/%.c, $(BDIR)/%.o, $(SRC)) $(BDIR)/tst_utils.o
 DEP:=$(patsubst $(BDIR)/%.o, $(BDIR)/%.d, $(OBJ))
 
+O_MAIN:=$(BDIR)/main.o
+O_FAIL:=$(BDIR)/fail.o
+# Redefine OBJ as all object files except for the ones with main()
+OBJ:=$(filter-out $(O_MAIN) $(O_FAIL), $(OBJ))
+
 INCFLAG:=-I$(TST_DIR) -I.
 INC:=$(wildcard $(TST_DIR)/*.h) tst_utils.h
 
-PROG:=out
-.PHONY: $(PROG)
-$(PROG): $(OBJ)
+PROG_MAIN:=main
+PROG_FAIL:=fail
+
+# Actually run all tests. If make finishes successfully, then the tests pass
+.PHONY: test
+test: $(PROG_FAIL) $(PROG_MAIN)
+	./$(PROG_MAIN)
+	./check_fail.sh
+
+$(PROG_MAIN): $(OBJ) $(O_MAIN)
+	$(CC) $^ -o $@
+
+$(PROG_FAIL): $(OBJ) $(O_FAIL)
 	$(CC) $^ -o $@
 
 .PHONY: clean
 clean:
-	rm $(BDIR)/*
+	rm $(PROG_FAIL) $(PROG_MAIN) $(BDIR)/*
 
 VPATH:=test .
 
