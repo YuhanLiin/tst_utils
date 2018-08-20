@@ -11,5 +11,6 @@ int main(void)
     tst_test_msg(empty, "top level test",);
     passing_tests();
     xfailing_tests();
+    teardown_tests();
     return tst_results();
 }

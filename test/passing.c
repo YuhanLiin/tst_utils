@@ -118,12 +118,6 @@ tst_begin_suite(EMPTY)
 {
 } tst_end_suite
 
-tst_begin_suite(SUITE_WITH_ASSERT)
-{
-    tst_assert_ne_int(0, 0);
-    tst_test_msg(divisible, "Should not be run", 3, 2);
-} tst_end_suite
-
 tst_begin_suite(ASSERTS)
 {
     tst_test(int_asserts,);
@@ -148,7 +142,6 @@ tst_begin_suite(PASSING)
 {
     tst_suite(EMPTY);
     tst_suite(ASSERTS);
-    tst_suite(SUITE_WITH_ASSERT);
     tst_suite(PARAMETERS);
 } tst_end_suite
 

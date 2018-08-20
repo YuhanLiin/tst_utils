@@ -53,25 +53,16 @@ int tst_results(void);
 #define tst_begin_suite(name)\
 tst_suite_header(name)\
 {\
+    _tst_indent_level++;\
 
-// Ends a suite expecting a tst_teardown label in the suite body for handling cleanup
-#define tst_end_suite_teardown\
-    return;\
-    goto _tst_test_failed;  /* Suppress unused label warning */\
-_tst_test_failed:\
-    goto tst_teardown;\
+// End of a test suite
+#define tst_end_suite\
+    _tst_indent_level--;\
 }
-
-#define tst_end_suite tst_teardown: tst_end_suite_teardown
-
-// Declares test suite without tst_teardown label, so failed asserts cause the code to just exit
-#define tst_decl_suite(name, ...) tst_decl_suite_teardown(name, __VA_ARGS__ tst_teardown:)
 
 #define tst_suite(name) do {\
     _tst_print_line("Suite %s:\n", #name);\
-    _tst_indent_level++;\
     _tst_suite_name(name)();\
-    _tst_indent_level--;\
 } while(0)
 
 /************************************ Test declaration macros **********************************/
@@ -170,10 +161,10 @@ _tst_all_assert_headers_for_type(str, const char *)
     
 /************************************ Assert macros **********************************/
 
-// Aborts the test/suite. When used in a test, the test is considered failed
+// Aborts the test and fails it.
 #define tst_abort() goto _tst_test_failed
 
-// On assert failure, jump to end of test/suite
+// On assert failure, jump to end of test
 #define _tst_assert_base(assert_name, expr, expected) do {\
     int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
     if (!_res) tst_abort();\

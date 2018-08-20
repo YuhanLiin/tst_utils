@@ -380,7 +380,7 @@ tst_begin_suite(ALL_XFAIL)
     tst_suite(PTR);
     tst_suite(DBL);
 
-    tst_test_xfail(abort,);
+    tst_test_xfail_msg(abort, "should fail after abort",);
 } tst_end_suite
 
 void xfailing_tests(void)
