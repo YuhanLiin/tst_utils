@@ -47,7 +47,7 @@ int tst_results(void);
 /************************************ Suite declaration macros **********************************/
 
 #define tst_suite_header(name)\
-    void _tst_suite_name(name)(void)
+    static void _tst_suite_name(name)(void)
 
 // Begins a test suite
 #define tst_begin_suite(name)\
@@ -97,6 +97,8 @@ _tst_test_failed:\
 // Ends test case without expecting tst_teardown label 
 #define tst_end_test tst_teardown: tst_end_test_teardown
 
+/************************************ Test runner macros **********************************/
+
 // Runs a test case with a custom message to print with the result
 #define tst_test_msg(name, msg, ...) do {\
     if (!_tst_test_name(name)(__VA_ARGS__)) {\
@@ -112,8 +114,24 @@ _tst_test_failed:\
     }\
 } while(0)
 
+// Runs a test case with a custom message. Expect the test to fail
+#define tst_test_xfail_msg(name, msg, ...) do {\
+    if (_tst_test_name(name)(__VA_ARGS__)) {\
+        _tst_print_line(\
+            _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) should have failed at %s:%d!\n"),\
+            msg, #__VA_ARGS__, __FILE__, __LINE__);\
+        _tst_stat_failed++;\
+    } else {\
+        _tst_print_line(\
+            _tst_green(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
+            msg, __FILE__, __LINE__);\
+        _tst_stat_passed++;\
+    }\
+} while(0)
+
 // Like the above, but uses the name of the test in place of the custom message
 #define tst_test(name, ...) tst_test_msg(name, #name, __VA_ARGS__)
+#define tst_test_xfail(name, ...) tst_test_xfail_msg(name, #name, __VA_ARGS__)
 
 /************************************ Assert headers **********************************/
 
