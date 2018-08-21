@@ -1,4 +1,4 @@
-CC:=gcc
+CC?=gcc
 CFLAGS:=-Wall -Wextra -Wformat=2 -Wundef -Wpointer-arith -Wcast-align\
 		-Wstrict-prototypes -Wwrite-strings -Wswitch-default -Werror\
 		-pedantic -std=c11 -g
@@ -23,8 +23,8 @@ PROG_MAIN:=main
 PROG_FAIL:=fail
 
 # Actually run all tests. If make finishes successfully, then the tests pass
-.PHONY: test
-test: $(PROG_FAIL) $(PROG_MAIN)
+.PHONY: all
+all: $(PROG_FAIL) $(PROG_MAIN)
 	./$(PROG_MAIN)
 	./check_fail.sh
 
