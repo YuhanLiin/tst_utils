@@ -9,6 +9,7 @@ tst_begin_test(teardown_test, int pass)
     teardown_flag = 0;
     body_flag = 0;
     if (!pass) tst_abort();
+    int unused; (void)unused;
     body_flag = 1;
 tst_teardown:
     teardown_flag = 1;

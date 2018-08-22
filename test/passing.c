@@ -112,6 +112,11 @@ tst_begin_test(divisible, int a, int b)
     tst_assert_eq_int(a % b, 0);
 } tst_end_test
 
+void run_test_in_func(void)
+{
+    tst_test_msg(divisible, "should run perfectly when called from another function", 2, 1);
+}
+
 // Suites begin here
 
 tst_begin_suite(EMPTY)
@@ -143,6 +148,7 @@ tst_begin_suite(PASSING)
     tst_suite(EMPTY);
     tst_suite(ASSERTS);
     tst_suite(PARAMETERS);
+    run_test_in_func();
 } tst_end_suite
 
 void passing_tests(void)
