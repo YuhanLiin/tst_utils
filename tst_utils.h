@@ -44,26 +44,18 @@ extern unsigned _tst_indent_level;
 // Returns 1 if tests fail, 0 if tests succeed. Used to report test results
 int tst_results(void);
 
-/************************************ Suite declaration macros **********************************/
+/************************************ Suite macros **********************************/
 
-#define tst_suite_header(name)\
-    static void _tst_suite_name(name)(void)
-
-// Begins a test suite
+// Suites simply cause the wrapped code to print messages at a higher indent level.
+// The name should still be an identifier for possible future features
 #define tst_begin_suite(name)\
-tst_suite_header(name)\
 {\
     _tst_indent_level++;\
+    _tst_print_line("Suite %s:\n", #name);\
 
-// End of a test suite
 #define tst_end_suite\
     _tst_indent_level--;\
 }
-
-#define tst_suite(name) do {\
-    _tst_print_line("Suite %s:\n", #name);\
-    _tst_suite_name(name)();\
-} while(0)
 
 /************************************ Test declaration macros **********************************/
 

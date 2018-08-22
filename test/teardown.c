@@ -32,18 +32,16 @@ tst_begin_test(body_not_set, void)
 } tst_end_test
 
 
-tst_begin_suite(TEARDOWN)
-{
-    tst_test(teardown_test, 1);
-    tst_test_msg(teardown_set, "teardown should occur on test pass",);
-    tst_test_msg(body_set, "test body should not be skipped on test pass",);
-
-    tst_test_xfail(teardown_test, 0);
-    tst_test_msg(teardown_set, "teardown should occur on test failure",);
-    tst_test_msg(body_not_set, "test body should be skipped on test failure",);
-} tst_end_suite
-
 void teardown_tests(void)
 {
-    tst_suite(TEARDOWN);
+    tst_begin_suite(TEARDOWN)
+    {
+        tst_test(teardown_test, 1);
+        tst_test_msg(teardown_set, "teardown should occur on test pass",);
+        tst_test_msg(body_set, "test body should not be skipped on test pass",);
+
+        tst_test_xfail(teardown_test, 0);
+        tst_test_msg(teardown_set, "teardown should occur on test failure",);
+        tst_test_msg(body_not_set, "test body should be skipped on test failure",);
+    } tst_end_suite
 }
