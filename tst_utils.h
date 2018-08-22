@@ -95,12 +95,12 @@ _tst_test_failed:\
     if (!_tst_test_name(name)(__VA_ARGS__)) {\
         _tst_print_line(\
             _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
-                msg, #__VA_ARGS__, __FILE__, __LINE__);\
+                (msg), #__VA_ARGS__, __FILE__, __LINE__);\
         _tst_stat_failed++;\
     } else {\
         _tst_print_line(\
             _tst_green(_tst_checkmark" Test \"%s\" passed at %s:%d!\n"),\
-                msg, __FILE__, __LINE__);\
+                (msg), __FILE__, __LINE__);\
         _tst_stat_passed++;\
     }\
 } while(0)
@@ -166,7 +166,7 @@ _tst_all_assert_headers_for_type(str, const char *)
 
 // On assert failure, jump to end of test
 #define _tst_assert_base(assert_name, expr, expected) do {\
-    int _res = assert_name(expr, expected, __FILE__, __LINE__, #expr);\
+    int _res = assert_name((expr), (expected), __FILE__, __LINE__, #expr);\
     if (!_res) tst_abort();\
 } while (0)
 
