@@ -13,10 +13,10 @@
 #include "tst_utils.h"
 
 // See if suite and test names do macro-expand
-#define suite_name(x) suite ## x
-#define test_name(x) test ## x
+#define suite_name(x) SUITE_ ## x
+#define test_name(x) test_ ## x
 
-tst_begin_test(test_name(0), void)
+tst_begin_test(test_name(macro_expand), void)
 {
     tst_assert_eq_uint(0, 0);
     tst_assert_gt_dbl(5, 0);
@@ -28,8 +28,8 @@ tst_begin_test(test_name(0), void)
 
 void macro_expansion_tests(void)
 {
-    tst_begin_suite(suite_name(0))
+    tst_begin_suite(suite_name(MACRO_EXPAND))
     {
-        tst_test(test_name(0),);
+        tst_test(test_name(macro_expand),);
     } tst_end_suite
 }
