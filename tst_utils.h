@@ -53,7 +53,7 @@ int tst_results(void);
 // The name should still be an identifier for possible future features
 #define tst_begin_suite(name)\
 {\
-    _tst_print_line("Suite %s:\n", #name);\
+    _tst_print_line("Suite %s:\n", _tst_stringize(name));\
     _tst_indent_level++;\
 
 #define tst_end_suite\
@@ -116,8 +116,8 @@ _tst_test_failed:\
 } while(0)
 
 // Like the above, but uses the name of the test in place of the custom message
-#define tst_test(name, ...) tst_test_msg(name, #name, __VA_ARGS__)
-#define tst_test_xfail(name, ...) tst_test_xfail_msg(name, #name, __VA_ARGS__)
+#define tst_test(name, ...) tst_test_msg(name, _tst_stringize(name), __VA_ARGS__)
+#define tst_test_xfail(name, ...) tst_test_xfail_msg(name, _tst_stringize(name), __VA_ARGS__)
 
 /************************************ Assert headers **********************************/
 
