@@ -12,5 +12,6 @@ int main(void)
     passing_tests();
     xfailing_tests();
     teardown_tests();
+    macro_expansion_tests();
     return tst_results();
 }

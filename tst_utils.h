@@ -14,13 +14,16 @@ extern unsigned _tst_indent_level;
 #define _tst_checkmark_line _tst_checkmark _tst_checkmark _tst_checkmark _tst_checkmark
 #define _tst_crossmark_line _tst_crossmark _tst_crossmark _tst_crossmark _tst_crossmark
 
+// Turn a string literal into a colour then reset the colour afterwards
 #define _tst_red(txt) "\x1b[31m" txt "\x1b[0m"
 #define _tst_green(txt) "\x1b[32m" txt "\x1b[0m"
 
+// Use these when we want the arguments to be macro-expanded
 #define _tst_concat(a, b) a##b
+#define _tst_stringize(a) #a
+
 // All user-defined test functions are prefixed with _tst_func_.
 #define _tst_test_name(name) _tst_concat(_tst_func_test_, name)
-#define _tst_suite_name(name) _tst_concat(_tst_func_suite_, name)
 
 // Print macros
 #define _tst_perror(...) fprintf(stderr, __VA_ARGS__)
@@ -50,8 +53,8 @@ int tst_results(void);
 // The name should still be an identifier for possible future features
 #define tst_begin_suite(name)\
 {\
-    _tst_indent_level++;\
     _tst_print_line("Suite %s:\n", #name);\
+    _tst_indent_level++;\
 
 #define tst_end_suite\
     _tst_indent_level--;\
@@ -125,31 +128,35 @@ int assert_name(\
     type expr, type expected,\
     const char * filename, int linenum, const char * expr_str) 
 
-// Header generation macros mirror the assert definition macros in the source file
+// Header generation macros mirror the assert definition macros in the source file.
+// Use token paste directly so the type_names don't get macro expanded.
 #define _tst_equality_assert_headers_for_type(type_name, type)\
-    _tst_assert_header(_tst_concat(_tst_assert_eq_, type_name), type);\
-    _tst_assert_header(_tst_concat(_tst_assert_ne_, type_name), type);
+    _tst_assert_header(_tst_assert_eq_ ## type_name, type);\
+    _tst_assert_header(_tst_assert_ne_ ## type_name, type);
 
 #define _tst_comparison_assert_headers_for_type(type_name, type)\
-    _tst_assert_header(_tst_concat(_tst_assert_gt_, type_name), type);\
-    _tst_assert_header(_tst_concat(_tst_assert_ge_, type_name), type);\
-    _tst_assert_header(_tst_concat(_tst_assert_lt_, type_name), type);\
-    _tst_assert_header(_tst_concat(_tst_assert_le_, type_name), type);
+    _tst_assert_header(_tst_assert_gt_ ## type_name, type);\
+    _tst_assert_header(_tst_assert_ge_ ## type_name, type);\
+    _tst_assert_header(_tst_assert_lt_ ## type_name, type);\
+    _tst_assert_header(_tst_assert_le_ ## type_name, type);
 
-#define _tst_all_assert_headers_for_type(type_name, type)\
-    _tst_equality_assert_headers_for_type(type_name, type)\
-    _tst_comparison_assert_headers_for_type(type_name, type)
+// Define equality and comparison asserts for a specific type.
+// To prevent the type_name from being macro expanded, paste an empty argument to it just
+// in case the type_name is a macro. As such, the "empty" argument needs to be really empty.
+#define _tst_all_assert_headers_for_type(type_name, type, empty)\
+    _tst_equality_assert_headers_for_type(type_name ## empty, type)\
+    _tst_comparison_assert_headers_for_type(type_name ## empty, type)
 
 // The actual headers
-_tst_all_assert_headers_for_type(int, int)
-_tst_all_assert_headers_for_type(uint, unsigned)
-_tst_all_assert_headers_for_type(ptr, const void *)
-_tst_all_assert_headers_for_type(char, char)
-_tst_all_assert_headers_for_type(size, size_t)
-_tst_all_assert_headers_for_type(long, long long int)
-_tst_all_assert_headers_for_type(ulong, unsigned long long int)
+_tst_all_assert_headers_for_type(int, int,)
+_tst_all_assert_headers_for_type(uint, unsigned,)
+_tst_all_assert_headers_for_type(ptr, const void *,)
+_tst_all_assert_headers_for_type(char, char,)
+_tst_all_assert_headers_for_type(size, size_t,)
+_tst_all_assert_headers_for_type(long, long long int,)
+_tst_all_assert_headers_for_type(ulong, unsigned long long int,)
+_tst_all_assert_headers_for_type(str, const char *,)
 _tst_comparison_assert_headers_for_type(dbl, double)
-_tst_all_assert_headers_for_type(str, const char *)
     
 /************************************ Assert macros **********************************/
 

@@ -37,20 +37,20 @@ _tst_assert_header(assert_name, type)\
 // Declares the eq and ne assertions for the specified type.
 // The cmp macro should test for equality.
 #define _tst_decl_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
-    _tst_decl_assert(_tst_concat(_tst_assert_eq_, type_name), fmt_spec, type, cmp, "equal")\
-    _tst_decl_assert(_tst_concat(_tst_assert_ne_, type_name), fmt_spec, type, !cmp, "not equal")
+    _tst_decl_assert(_tst_assert_eq_ ## type_name, fmt_spec, type, cmp, "equal")\
+    _tst_decl_assert(_tst_assert_ne_ ## type_name, fmt_spec, type, !cmp, "not equal")
 
 // Declares the less/greater than assertions for specified type. Only available for numerical types.
 // The cmp_gt and cmp_lt macros should test for greater than and less than.
 #define _tst_decl_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)\
     _tst_decl_assert(\
-        _tst_concat(_tst_assert_gt_, type_name), fmt_spec, type, cmp_gt, "greater than")\
+        _tst_assert_gt_ ## type_name, fmt_spec, type, cmp_gt, "greater than")\
     _tst_decl_assert(\
-        _tst_concat(_tst_assert_ge_, type_name), fmt_spec, type, !cmp_lt, "greater than or equal")\
+        _tst_assert_ge_ ## type_name, fmt_spec, type, !cmp_lt, "greater than or equal")\
     _tst_decl_assert(\
-        _tst_concat(_tst_assert_lt_, type_name), fmt_spec, type, cmp_lt, "less than")\
+        _tst_assert_lt_ ## type_name, fmt_spec, type, cmp_lt, "less than")\
     _tst_decl_assert(\
-        _tst_concat(_tst_assert_le_, type_name), fmt_spec, type, !cmp_gt, "less than or equal")
+        _tst_assert_le_ ## type_name, fmt_spec, type, !cmp_gt, "less than or equal")
 
 // Declares all 6 assertions for specified type. Only available for numerical types
 #define _tst_decl_all_asserts_for_type(type_name, fmt_spec, type, cmp, cmp_gt, cmp_lt)\
