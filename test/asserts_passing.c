@@ -111,14 +111,14 @@ void asserts_passing_tests(void)
 {
     tst_begin_suite(PASSING_ASSERTS)
     {
-        tst_test(int_asserts,);
-        tst_test(long_asserts,);
-        tst_test(uint_asserts,);
-        tst_test(ulong_asserts,);
-        tst_test(size_asserts,);
-        tst_test(char_asserts,);
-        tst_test(ptr_asserts,);
-        tst_test(str_asserts,);
-        tst_test(dbl_asserts,);
+        tst_test(int_asserts, ());
+        tst_test(long_asserts, ());
+        tst_test(uint_asserts, ());
+        tst_test(ulong_asserts, ());
+        tst_test(size_asserts, ());
+        tst_test(char_asserts, ());
+        tst_test(ptr_asserts, ());
+        tst_test(str_asserts, ());
+        tst_test(dbl_asserts, ());
     } tst_end_suite
 }

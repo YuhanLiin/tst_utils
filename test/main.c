@@ -2,13 +2,13 @@
 
 #include "test/all_tests.h"
 
-tst_begin_test(empty, void)
+tst_begin_test(empty, (void))
 {
 } tst_end_test
 
 int main(void)
 {
-    tst_test_msg(empty, "top level test",);
+    tst_test_msg(empty, "top level test", ());
     passing_tests();
     xfail_tests();
     ignore_tests();

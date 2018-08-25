@@ -1,7 +1,7 @@
 CC?=gcc
 CFLAGS:=-Wall -Wextra -Wformat=2 -Wundef -Wpointer-arith -Wcast-align\
 		-Wstrict-prototypes -Wwrite-strings -Wswitch-default -Werror\
-		-Wshadow -pedantic -std=c99 -O2 -g
+		-Wshadow -pedantic -std=c89 -O2 -g
 DEPFLAGS:=-MMD -MP
 
 TST_DIR:=test

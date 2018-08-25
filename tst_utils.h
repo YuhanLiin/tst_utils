@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-// Declares global state struct and variables
+/* Declares global state struct and variables */
 struct _tst_Stats {
     unsigned passed;
     unsigned failed;
@@ -15,54 +15,54 @@ struct _tst_Stats {
 extern struct _tst_Stats _tst_stats;
 extern unsigned _tst_indent_level;
 
-// Symbols
+/* Symbols */
 #define _tst_checkmark "\u2713"
 #define _tst_crossmark "\u2717"
 #define _tst_checkmark_line _tst_checkmark _tst_checkmark _tst_checkmark _tst_checkmark
 #define _tst_crossmark_line _tst_crossmark _tst_crossmark _tst_crossmark _tst_crossmark
 
-// Turn a string literal into a colour then reset the colour afterwards
+/* Turn a string literal into a colour then reset the colour afterwards */
 #define _tst_red(txt) "\x1b[31m" txt "\x1b[0m"
 #define _tst_green(txt) "\x1b[32m" txt "\x1b[0m"
 #define _tst_blue(txt) "\x1B[34m" txt "\x1b[0m"
 #define _tst_yellow(txt) "\x1B[33m" txt "\x1b[0m"
 
-// Use these when we want the arguments to be macro-expanded
+/* Use these when we want the arguments to be macro-expanded */
 #define _tst_concat(a, b) a##b
 #define _tst_stringize(a) #a
 
-// All user-defined test functions are prefixed with _tst_func_.
+/* All user-defined test functions are prefixed with _tst_func_. */
 #define _tst_test_name(name) _tst_concat(_tst_func_test_, name)
 
-// Print macros
-#define _tst_perror(...) fprintf(stderr, __VA_ARGS__)
-#define _tst_print(...) printf(__VA_ARGS__)
+/* Print macros */
+#define _tst_perror(args) printf(args)
+#define _tst_print(args) printf(args)
 
-// Prints current number of indents followed by formatted message.
-#define _tst_perror_line(...) do {\
+/* Prints current number of indents followed by formatted message. */
+#define _tst_perror_line(args) do {\
     for (unsigned _i = 0; _i < _tst_indent_level; _i++) {\
         _tst_perror("    ");\
     }\
-    _tst_perror(__VA_ARGS__);\
+    _tst_perror(args);\
 } while (0)
 
-#define _tst_print_line(...) do {\
+#define _tst_print_line(args) do {\
     for (unsigned _i = 0; _i < _tst_indent_level; _i++) {\
         _tst_print("    ");\
     }\
-    _tst_print(__VA_ARGS__);\
+    _tst_print(args);\
 } while (0)
 
-// Returns 1 if tests fail, 0 if tests succeed. Used to report test results
+/* Returns 1 if tests fail, 0 if tests succeed. Used to report test results */
 int tst_results(void);
 
 /************************************ Suite macros **********************************/
 
-// Suites simply cause the wrapped code to print messages at a higher indent level.
-// The name should still be an identifier for possible future features
+/* Suites simply cause the wrapped code to print messages at a higher indent level. */
+/* The name should still be an identifier for possible future features */
 #define tst_begin_suite(name)\
 {\
-    _tst_print_line("Suite %s:\n", _tst_stringize(name));\
+    _tst_print_line(("Suite %s:\n", _tst_stringize(name)));\
     _tst_indent_level++;\
 
 #define tst_end_suite\
@@ -73,12 +73,12 @@ int tst_results(void);
 
 enum _tst_Result { _tst_PASS, _tst_FAIL, _tst_XFAIL, _tst_XPASS, _tst_IGNORE };
 
-#define tst_test_header(name, ...)\
-    static enum _tst_Result _tst_test_name(name)(__VA_ARGS__)
+#define tst_test_header(name, args)\
+    static enum _tst_Result _tst_test_name(name)(args)
 
-// Specifies the _tst_Result returned by the test on pass and on failure
-#define _tst_begin_test_base(name, pass_result, fail_result, ...)\
-tst_test_header(name, __VA_ARGS__)\
+/* Specifies the _tst_Result returned by the test on pass and on failure */
+#define _tst_begin_test_base(name, pass_result, fail_result, args)\
+tst_test_header(name, args)\
 {\
     enum _tst_Result _result = pass_result;\
     goto _tst_test_begin;\
@@ -88,30 +88,30 @@ _tst_test_failed:\
     goto tst_teardown;  /* This label will be provided by user code or end_test macro */\
 _tst_test_begin:
 
-// Defines basic test that returns back PASS or FAIL
-#define tst_begin_test(name, ...) _tst_begin_test_base(name, _tst_PASS, _tst_FAIL, __VA_ARGS__)
+/* Defines basic test that returns back PASS or FAIL */
+#define tst_begin_test(name, args) _tst_begin_test_base(name, _tst_PASS, _tst_FAIL, args)
 
-// Defines test that will be expected to fail
-#define tst_begin_test_xfail(name, ...) _tst_begin_test_base(name, _tst_XPASS, _tst_XFAIL, __VA_ARGS__)
+/* Defines test that will be expected to fail */
+#define tst_begin_test_xfail(name, args) _tst_begin_test_base(name, _tst_XPASS, _tst_XFAIL, args)
 
-// Defines test whose results will be ignored
-#define tst_begin_test_ignore(name, ...)\
-    _tst_begin_test_base(name, _tst_IGNORE, _tst_IGNORE, __VA_ARGS__)
+/* Defines test whose results will be ignored */
+#define tst_begin_test_ignore(name, args)\
+    _tst_begin_test_base(name, _tst_IGNORE, _tst_IGNORE, args)
 
-// Ends a test case. Expect a tst_teardown label in the above code to preceed cleanup code
+/* Ends a test case. Expect a tst_teardown label in the above code to preceed cleanup code */
 #define tst_end_test_teardown\
     return _result;\
 }
 
-// Ends test case without expecting tst_teardown label 
+/* Ends test case without expecting tst_teardown label  */
 #define tst_end_test tst_teardown: tst_end_test_teardown
 
 /************************************ Test runner macros **********************************/
 
-// Runs test case and prints message according to the result.
-// The ignore and xfail flags modify the result before the message is printed.
-#define _tst_test_base(name, msg, ignore, xfail, ...) do {\
-    enum _tst_Result _result = _tst_test_name(name)(__VA_ARGS__);\
+/* Runs test case and prints message according to the result. */
+/* The ignore and xfail flags modify the result before the message is printed. */
+#define _tst_test_base(name, msg, ignore, xfail, args) do {\
+    enum _tst_Result _result = _tst_test_name(name)(args);\
     if (xfail) {\
         if (_result == _tst_PASS) { _result = _tst_XPASS; }\
         else if (_result == _tst_FAIL) { _result = _tst_XFAIL; }\
@@ -120,55 +120,55 @@ _tst_test_begin:
 \
     switch (_result) {\
         case _tst_PASS:\
-            _tst_print_line(_tst_green(_tst_checkmark" Test \"%s\" passed\n"), (msg));\
+            _tst_print_line((_tst_green(_tst_checkmark" Test \"%s\" passed\n"), (msg)));\
             _tst_stats.passed++; break;\
         case _tst_FAIL:\
-            _tst_print_line(\
+            _tst_print_line((\
                 _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
-                    (msg), #__VA_ARGS__, __FILE__, __LINE__);\
+                    (msg), #args, __FILE__, __LINE__));\
             _tst_stats.failed++; break;\
         case _tst_XPASS:\
-            _tst_print_line(\
+            _tst_print_line((\
                 _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) unexpectedly passed at %s:%d!\n"),\
-                msg, #__VA_ARGS__, __FILE__, __LINE__);\
+                msg, #args, __FILE__, __LINE__));\
             _tst_stats.xpassed++; break;\
         case _tst_XFAIL:\
-            _tst_print_line(\
+            _tst_print_line((\
                 _tst_blue(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
-                msg, __FILE__, __LINE__);\
+                msg, __FILE__, __LINE__));\
             _tst_stats.xfailed++; break;\
         case _tst_IGNORE:\
-            _tst_print_line(\
+            _tst_print_line((\
                 _tst_yellow(_tst_checkmark" Test \"%s\" results ignored at %s:%d!\n"),\
-                msg, __FILE__, __LINE__);\
+                msg, __FILE__, __LINE__));\
             _tst_stats.ignored++; break;\
-        default: _tst_perror_line("WTF unrecognized test result\n");\
+        default: _tst_perror_line(("WTF unrecognized test result\n"));\
     }\
 } while (0)\
 
-// Run test case with custom message to print with the results.
-#define tst_test_msg(name, msg, ...) _tst_test_base(name, msg, 0, 0, __VA_ARGS__)
-// Expect the test to fail, so passing in PASS and FAIL are treated like XPASS and XFAIL
-#define tst_test_msg_xfail(name, msg, ...) _tst_test_base(name, msg, 0, 1, __VA_ARGS__)
-// Run test but ignore results
-#define tst_test_msg_ignore(name, msg, ...) _tst_test_base(name, msg, 1, 0, __VA_ARGS__)
+/* Run test case with custom message to print with the results. */
+#define tst_test_msg(name, msg, args) _tst_test_base(name, msg, 0, 0, args)
+/* Expect the test to fail, so passing in PASS and FAIL are treated like XPASS and XFAIL */
+#define tst_test_msg_xfail(name, msg, args) _tst_test_base(name, msg, 0, 1, args)
+/* Run test but ignore results */
+#define tst_test_msg_ignore(name, msg, args) _tst_test_base(name, msg, 1, 0, args)
 
-// Like the above, but uses the name of the test in place of the custom message
-#define tst_test(name, ...) tst_test_msg(name, _tst_stringize(name), __VA_ARGS__)
-#define tst_test_xfail(name, ...) tst_test_msg_xfail(name, _tst_stringize(name), __VA_ARGS__)
-#define tst_test_ignore(name, ...) tst_test_msg_ignore(name, _tst_stringize(name), __VA_ARGS__)
+/* Like the above, but uses the name of the test in place of the custom message */
+#define tst_test(name, args) tst_test_msg(name, _tst_stringize(name), args)
+#define tst_test_xfail(name, args) tst_test_msg_xfail(name, _tst_stringize(name), args)
+#define tst_test_ignore(name, args) tst_test_msg_ignore(name, _tst_stringize(name), args)
 
 /************************************ Assert headers **********************************/
 
-// Generates the signature of a assertion function based on its type
-// The last four args of the function will be passed in via the macro
+/* Generates the signature of a assertion function based on its type */
+/* The last four args of the function will be passed in via the macro */
 #define _tst_assert_header(assert_name, type)\
 int assert_name(\
     type expr, type expected,\
     const char * filename, int linenum, const char * expr_str) 
 
-// Header generation macros mirror the assert definition macros in the source file.
-// Use token paste directly so the type_names don't get macro expanded.
+/* Header generation macros mirror the assert definition macros in the source file. */
+/* Use token paste directly so the type_names don't get macro expanded. */
 #define _tst_equality_assert_headers_for_type(type_name, type)\
     _tst_assert_header(_tst_assert_eq_ ## type_name, type);\
     _tst_assert_header(_tst_assert_ne_ ## type_name, type);
@@ -179,14 +179,14 @@ int assert_name(\
     _tst_assert_header(_tst_assert_lt_ ## type_name, type);\
     _tst_assert_header(_tst_assert_le_ ## type_name, type);
 
-// Define equality and comparison asserts for a specific type.
-// To prevent the type_name from being macro expanded, paste an empty argument to it just
-// in case the type_name is a macro. As such, the "empty" argument needs to be really empty.
+/* Define equality and comparison asserts for a specific type. */
+/* To prevent the type_name from being macro expanded, paste an empty argument to it just */
+/* in case the type_name is a macro. As such, the "empty" argument needs to be really empty. */
 #define _tst_all_assert_headers_for_type(type_name, type, empty)\
     _tst_equality_assert_headers_for_type(type_name ## empty, type)\
     _tst_comparison_assert_headers_for_type(type_name ## empty, type)
 
-// The actual headers
+/* The actual headers */
 _tst_all_assert_headers_for_type(int, int,)
 _tst_all_assert_headers_for_type(uint, unsigned,)
 _tst_all_assert_headers_for_type(ptr, const void *,)
@@ -199,16 +199,16 @@ _tst_comparison_assert_headers_for_type(dbl, double)
     
 /************************************ Assert macros **********************************/
 
-// Aborts the test and fails it.
+/* Aborts the test and fails it. */
 #define tst_abort() goto _tst_test_failed
 
-// On assert failure, jump to end of test
+/* On assert failure, jump to end of test */
 #define _tst_assert_base(assert_name, expr, expected, expr_str) do {\
     int _res = assert_name((expr), (expected), __FILE__, __LINE__, expr_str);\
     if (!_res) tst_abort();\
 } while (0)
 
-// All assert macros
+/* All assert macros */
 #define tst_assert_eq_int(expr, expected) _tst_assert_base(_tst_assert_eq_int, expr, expected, #expr)
 #define tst_assert_ne_int(expr, expected) _tst_assert_base(_tst_assert_ne_int, expr, expected, #expr)
 #define tst_assert_gt_int(expr, expected) _tst_assert_base(_tst_assert_gt_int, expr, expected, #expr)

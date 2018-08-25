@@ -1,8 +1,8 @@
-// These test the corner cases of the macro expansions used in the header file.
-// The main criteria here is whether everything compiles.
+/* These test the corner cases of the macro expansions used in the header file. */
+/* The main criteria here is whether everything compiles. */
 
-// These are type names used internally to construct assert function names.
-// They should not be macro-expanded, so the header should compile even with this wonky definition.
+/* These are type names used internally to construct assert function names. */
+/* They should not be macro-expanded, so the header should compile even with this wonky definition. */
 #define uint ,,,
 #define dbl ,,,
 #define ulong ,,,
@@ -12,7 +12,7 @@
 
 #include "tst_utils.h"
 
-// See if suite and test names do macro-expand
+/* See if suite and test names do macro-expand */
 #define suite_name(x) SUITE_ ## x
 #define test_name(x) test_ ## x
 
@@ -30,6 +30,6 @@ void macro_expansion_tests(void)
 {
     tst_begin_suite(suite_name(MACRO_EXPAND))
     {
-        tst_test(test_name(macro_expand),);
+        tst_test(test_name(0), ());
     } tst_end_suite
 }
