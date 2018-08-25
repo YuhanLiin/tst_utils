@@ -44,13 +44,13 @@ _tst_assert_header(assert_name, type)\
 // The cmp_gt and cmp_lt macros should test for greater than and less than.
 #define _tst_def_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)\
     _tst_def_assert(\
-        _tst_assert_gt_ ## type_name, fmt_spec, type, cmp_gt, "greater than")\
+        _tst_assert_gt_ ## type_name, fmt_spec, type, cmp_gt, "be greater than")\
     _tst_def_assert(\
-        _tst_assert_ge_ ## type_name, fmt_spec, type, !cmp_lt, "greater than or equal")\
+        _tst_assert_ge_ ## type_name, fmt_spec, type, !cmp_lt, "be greater than or equal to")\
     _tst_def_assert(\
-        _tst_assert_lt_ ## type_name, fmt_spec, type, cmp_lt, "less than")\
+        _tst_assert_lt_ ## type_name, fmt_spec, type, cmp_lt, "be less than")\
     _tst_def_assert(\
-        _tst_assert_le_ ## type_name, fmt_spec, type, !cmp_gt, "less than or equal")
+        _tst_assert_le_ ## type_name, fmt_spec, type, !cmp_gt, "be less than or equal to")
 
 // Declares all 6 assertions for specified type. Only available for numerical types
 #define _tst_def_all_asserts_for_type(type_name, fmt_spec, type, cmp, cmp_gt, cmp_lt)\
