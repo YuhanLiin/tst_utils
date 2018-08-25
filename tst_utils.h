@@ -24,6 +24,8 @@ extern unsigned _tst_indent_level;
 // Turn a string literal into a colour then reset the colour afterwards
 #define _tst_red(txt) "\x1b[31m" txt "\x1b[0m"
 #define _tst_green(txt) "\x1b[32m" txt "\x1b[0m"
+#define _tst_blue(txt) "\x1B[34m" txt "\x1b[0m"
+#define _tst_yellow(txt) "\x1B[33m" txt "\x1b[0m"
 
 // Use these when we want the arguments to be macro-expanded
 #define _tst_concat(a, b) a##b
@@ -127,17 +129,17 @@ _tst_test_begin:
             _tst_stats.failed++; break;\
         case _tst_XPASS:\
             _tst_print_line(\
-                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) passed unexpectedly at %s:%d!\n"),\
+                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) unexpectedly passed at %s:%d!\n"),\
                 msg, #__VA_ARGS__, __FILE__, __LINE__);\
             _tst_stats.xpassed++; break;\
         case _tst_XFAIL:\
             _tst_print_line(\
-                _tst_green(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
+                _tst_blue(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
                 msg, __FILE__, __LINE__);\
             _tst_stats.xfailed++; break;\
         case _tst_IGNORE:\
             _tst_print_line(\
-                _tst_green(_tst_checkmark" Test \"%s\" results ignored at %s:%d!\n"),\
+                _tst_yellow(_tst_checkmark" Test \"%s\" results ignored at %s:%d!\n"),\
                 msg, __FILE__, __LINE__);\
             _tst_stats.ignored++; break;\
         default: _tst_perror_line("WTF unrecognized test result\n");\
