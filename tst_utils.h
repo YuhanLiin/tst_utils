@@ -94,8 +94,7 @@ _tst_test_begin:
 
 // Defines test whose results will be ignored
 #define tst_begin_test_ignore(name, ...)\
-    _tst_begin_test_base(name, _tst_IGNORE, _tst_IGNORE, __VA_ARGS__)\
-    return _result;
+    _tst_begin_test_base(name, _tst_IGNORE, _tst_IGNORE, __VA_ARGS__)
 
 // Ends a test case. Expect a tst_teardown label in the above code to preceed cleanup code
 #define tst_end_test_teardown\
@@ -148,14 +147,14 @@ _tst_test_begin:
 // Run test case with custom message to print with the results.
 #define tst_test_msg(name, msg, ...) _tst_test_base(name, msg, 0, 0, __VA_ARGS__)
 // Expect the test to fail, so passing in PASS and FAIL are treated like XPASS and XFAIL
-#define tst_test_xfail_msg(name, msg, ...) _tst_test_base(name, msg, 0, 1, __VA_ARGS__)
+#define tst_test_msg_xfail(name, msg, ...) _tst_test_base(name, msg, 0, 1, __VA_ARGS__)
 // Run test but ignore results
-#define tst_test_ignore_msg(name, msg, ...) _tst_test_base(name, msg, 1, 0, __VA_ARGS__)
+#define tst_test_msg_ignore(name, msg, ...) _tst_test_base(name, msg, 1, 0, __VA_ARGS__)
 
 // Like the above, but uses the name of the test in place of the custom message
 #define tst_test(name, ...) tst_test_msg(name, _tst_stringize(name), __VA_ARGS__)
-#define tst_test_xfail(name, ...) tst_test_xfail_msg(name, _tst_stringize(name), __VA_ARGS__)
-#define tst_test_ignore(name, ...) tst_test_ignore_msg(name, _tst_stringize(name), __VA_ARGS__)
+#define tst_test_xfail(name, ...) tst_test_msg_xfail(name, _tst_stringize(name), __VA_ARGS__)
+#define tst_test_ignore(name, ...) tst_test_msg_ignore(name, _tst_stringize(name), __VA_ARGS__)
 
 /************************************ Assert headers **********************************/
 

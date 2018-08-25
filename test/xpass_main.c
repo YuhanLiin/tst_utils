@@ -13,7 +13,7 @@ int main(void)
 {
     tst_begin_suite(XPASS) {
         tst_test_xfail(is_zero, 0);
-        tst_test_xfail_msg(is_zero, "should not pass", 0);
+        tst_test_msg_xfail(is_zero, "should not pass", 0);
 
         tst_test_xfail(xpass,);
         tst_test_msg(xpass, "xfail marked test should xpass even when ran normally",);

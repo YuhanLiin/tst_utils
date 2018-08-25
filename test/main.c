@@ -11,6 +11,7 @@ int main(void)
     tst_test_msg(empty, "top level test",);
     passing_tests();
     xfail_tests();
+    ignore_tests();
     asserts_passing_tests();
     asserts_xfailing_tests();
     teardown_tests();

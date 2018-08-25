@@ -11,7 +11,7 @@ tst_end_test
 void xfail_tests(void)
 {
     tst_begin_suite(XFAIL) {
-        tst_test_xfail_msg(is_ten, "should xfail", 9);
+        tst_test_msg_xfail(is_ten, "should xfail", 9);
         tst_test_xfail(xfail,);
         tst_test_msg(xfail, "xfail marked test should xfail even when run normally",);
     } tst_end_suite
