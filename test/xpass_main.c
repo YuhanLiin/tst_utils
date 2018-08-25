@@ -16,7 +16,7 @@ int main(void)
         tst_test_xfail_msg(is_zero, "should not pass", 0);
 
         tst_test_xfail(xpass,);
-        tst_test_msg(xpass, "should xpass even when ran normally",);
+        tst_test_msg(xpass, "xfail marked test should xpass even when ran normally",);
     } tst_end_suite
 
     return tst_results();
