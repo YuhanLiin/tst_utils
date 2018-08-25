@@ -27,6 +27,7 @@ tst_begin_test(fail_assertion, void)
     tst_assert_eq_int(0, 1);
 } tst_end_test
 
+// Quarantine all actual failures to a separate test environment, hence the main()
 int main(void)
 {
     tst_begin_suite(FAIL)

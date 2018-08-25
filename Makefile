@@ -12,7 +12,8 @@ OBJ:=$(patsubst $(TST_DIR)/%.c, $(BDIR)/%.o, $(SRC)) $(BDIR)/tst_utils.o
 DEP:=$(patsubst $(BDIR)/%.o, $(BDIR)/%.d, $(OBJ))
 
 O_MAIN:=$(BDIR)/main.o
-O_FAIL:=$(BDIR)/fail.o
+O_FAIL:=$(BDIR)/fail_main.o
+
 # Redefine OBJ as all object files except for the ones with main()
 OBJ:=$(filter-out $(O_MAIN) $(O_FAIL), $(OBJ))
 

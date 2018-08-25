@@ -283,14 +283,8 @@ tst_begin_test(dbl_le, void)
     tst_assert_le_dbl(5.5, 2.5);
 } tst_end_test
 
-// Intentionally failing test
-tst_begin_test(abort, void)
-{
-    tst_abort();
-} tst_end_test
 
-
-void xfailing_tests(void)
+void asserts_xfailing_tests(void)
 {
     // Test for failure cases of all assertions
     tst_begin_suite(ALL_XFAIL)
@@ -383,6 +377,5 @@ void xfailing_tests(void)
             tst_test_xfail(dbl_ge,);
         } tst_end_suite
 
-        tst_test_xfail_msg(abort, "should fail after abort",);
     } tst_end_suite
 }
