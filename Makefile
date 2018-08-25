@@ -11,33 +11,40 @@ BDIR:=build
 OBJ:=$(patsubst $(TST_DIR)/%.c, $(BDIR)/%.o, $(SRC)) $(BDIR)/tst_utils.o
 DEP:=$(patsubst $(BDIR)/%.o, $(BDIR)/%.d, $(OBJ))
 
-O_MAIN:=$(BDIR)/main.o
+O_PASS:=$(BDIR)/main.o
 O_FAIL:=$(BDIR)/fail_main.o
+O_XPASS:=$(BDIR)/xpass_main.o
+O_MAINS:=$(O_PASS) $(O_FAIL) $(O_XPASS)
 
 # Redefine OBJ as all object files except for the ones with main()
-OBJ:=$(filter-out $(O_MAIN) $(O_FAIL), $(OBJ))
+OBJ:=$(filter-out $(O_MAINS), $(OBJ))
 
 INCFLAG:=-I$(TST_DIR) -I.
 INC:=$(wildcard $(TST_DIR)/*.h) tst_utils.h
 
-PROG_MAIN:=main
-PROG_FAIL:=fail
+PROG_MAIN:=$(BDIR)/main
+PROG_FAIL:=$(BDIR)/fail
+PROG_XPASS:=$(BDIR)/xpass
 
 # Actually run all tests. If make finishes successfully, then the tests pass
 .PHONY: all
-all: $(PROG_FAIL) $(PROG_MAIN)
+all: $(PROG_FAIL) $(PROG_MAIN) $(PROG_XPASS)
 	./$(PROG_MAIN)
-	./check_fail.sh
+	./check_fail.sh $(PROG_FAIL)
+	./check_fail.sh $(PROG_XPASS)
 
-$(PROG_MAIN): $(OBJ) $(O_MAIN)
+$(PROG_MAIN): $(OBJ) $(O_PASS)
 	$(CC) $^ -o $@
 
 $(PROG_FAIL): $(OBJ) $(O_FAIL)
 	$(CC) $^ -o $@
 
+$(PROG_XPASS): $(OBJ) $(O_XPASS)
+	$(CC) $^ -o $@
+
 .PHONY: clean
 clean:
-	rm $(PROG_FAIL) $(PROG_MAIN) $(BDIR)/*
+	rm $(BDIR)/*
 
 VPATH:=test .
 

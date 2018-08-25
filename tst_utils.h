@@ -3,9 +3,16 @@
 #include <stdio.h>
 #include <string.h>
 
-// Declares global state variables
-extern unsigned _tst_stat_passed;
-extern unsigned _tst_stat_failed;
+// Declares global state struct and variables
+struct _tst_Stats {
+    unsigned passed;
+    unsigned failed;
+    unsigned xpassed;
+    unsigned xfailed;
+    unsigned ignored;
+};
+
+extern struct _tst_Stats _tst_stats;
 extern unsigned _tst_indent_level;
 
 // Symbols
@@ -62,22 +69,37 @@ int tst_results(void);
 
 /************************************ Test declaration macros **********************************/
 
-#define tst_test_header(name, ...)\
-    static int _tst_test_name(name)(__VA_ARGS__)
+enum _tst_Result { _tst_PASS, _tst_FAIL, _tst_XFAIL, _tst_XPASS, _tst_IGNORE };
 
-// Forms beginning of a test case
-#define tst_begin_test(name, ...)\
+#define tst_test_header(name, ...)\
+    static enum _tst_Result _tst_test_name(name)(__VA_ARGS__)
+
+// Specifies the _tst_Result returned by the test on pass and on failure
+#define _tst_begin_test_base(name, pass_result, fail_result, ...)\
 tst_test_header(name, __VA_ARGS__)\
 {\
-    int _result = 1;
+    enum _tst_Result _result = pass_result;\
+    goto _tst_test_begin;\
+    goto _tst_test_failed;  /* Suppress unused label warning */\
+_tst_test_failed:\
+    _result = fail_result;\
+    goto tst_teardown;  /* This label will be provided by user code or end_test macro */\
+_tst_test_begin:
+
+// Defines basic test that returns back PASS or FAIL
+#define tst_begin_test(name, ...) _tst_begin_test_base(name, _tst_PASS, _tst_FAIL, __VA_ARGS__)
+
+// Defines test that will be expected to fail
+#define tst_begin_test_xfail(name, ...) _tst_begin_test_base(name, _tst_XPASS, _tst_XFAIL, __VA_ARGS__)
+
+// Defines test whose results will be ignored
+#define tst_begin_test_ignore(name, ...)\
+    _tst_begin_test_base(name, _tst_IGNORE, _tst_IGNORE, __VA_ARGS__)\
+    return _result;
 
 // Ends a test case. Expect a tst_teardown label in the above code to preceed cleanup code
 #define tst_end_test_teardown\
     return _result;\
-    goto _tst_test_failed;  /* Suppress unused label warning */\
-_tst_test_failed:\
-    _result = 0;\
-    goto tst_teardown;\
 }
 
 // Ends test case without expecting tst_teardown label 
@@ -85,39 +107,55 @@ _tst_test_failed:\
 
 /************************************ Test runner macros **********************************/
 
-// Runs a test case with a custom message to print with the result
-#define tst_test_msg(name, msg, ...) do {\
-    if (!_tst_test_name(name)(__VA_ARGS__)) {\
-        _tst_print_line(\
-            _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
-                (msg), #__VA_ARGS__, __FILE__, __LINE__);\
-        _tst_stat_failed++;\
-    } else {\
-        _tst_print_line(\
-            _tst_green(_tst_checkmark" Test \"%s\" passed at %s:%d!\n"),\
-                (msg), __FILE__, __LINE__);\
-        _tst_stat_passed++;\
+// Runs test case and prints message according to the result.
+// The ignore and xfail flags modify the result before the message is printed.
+#define _tst_test_base(name, msg, ignore, xfail, ...) do {\
+    enum _tst_Result _result = _tst_test_name(name)(__VA_ARGS__);\
+    if (xfail) {\
+        if (_result == _tst_PASS) { _result = _tst_XPASS; }\
+        else if (_result == _tst_FAIL) { _result = _tst_XFAIL; }\
     }\
-} while(0)
+    else if (ignore) { _result = _tst_IGNORE; }\
+\
+    switch (_result) {\
+        case _tst_PASS:\
+            _tst_print_line(_tst_green(_tst_checkmark" Test \"%s\" passed\n"), (msg));\
+            _tst_stats.passed++; break;\
+        case _tst_FAIL:\
+            _tst_print_line(\
+                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
+                    (msg), #__VA_ARGS__, __FILE__, __LINE__);\
+            _tst_stats.failed++; break;\
+        case _tst_XPASS:\
+            _tst_print_line(\
+                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) passed unexpectedly at %s:%d!\n"),\
+                msg, #__VA_ARGS__, __FILE__, __LINE__);\
+            _tst_stats.xpassed++; break;\
+        case _tst_XFAIL:\
+            _tst_print_line(\
+                _tst_green(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
+                msg, __FILE__, __LINE__);\
+            _tst_stats.xfailed++; break;\
+        case _tst_IGNORE:\
+            _tst_print_line(\
+                _tst_green(_tst_checkmark" Test \"%s\" results ignored at %s:%d!\n"),\
+                msg, __FILE__, __LINE__);\
+            _tst_stats.ignored++; break;\
+        default: _tst_perror_line("WTF unrecognized test result\n");\
+    }\
+} while (0)\
 
-// Runs a test case with a custom message. Expect the test to fail
-#define tst_test_xfail_msg(name, msg, ...) do {\
-    if (_tst_test_name(name)(__VA_ARGS__)) {\
-        _tst_print_line(\
-            _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) should have failed at %s:%d!\n"),\
-            msg, #__VA_ARGS__, __FILE__, __LINE__);\
-        _tst_stat_failed++;\
-    } else {\
-        _tst_print_line(\
-            _tst_green(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
-            msg, __FILE__, __LINE__);\
-        _tst_stat_passed++;\
-    }\
-} while(0)
+// Run test case with custom message to print with the results.
+#define tst_test_msg(name, msg, ...) _tst_test_base(name, msg, 0, 0, __VA_ARGS__)
+// Expect the test to fail, so passing in PASS and FAIL are treated like XPASS and XFAIL
+#define tst_test_xfail_msg(name, msg, ...) _tst_test_base(name, msg, 0, 1, __VA_ARGS__)
+// Run test but ignore results
+#define tst_test_ignore_msg(name, msg, ...) _tst_test_base(name, msg, 1, 0, __VA_ARGS__)
 
 // Like the above, but uses the name of the test in place of the custom message
 #define tst_test(name, ...) tst_test_msg(name, _tst_stringize(name), __VA_ARGS__)
 #define tst_test_xfail(name, ...) tst_test_xfail_msg(name, _tst_stringize(name), __VA_ARGS__)
+#define tst_test_ignore(name, ...) tst_test_ignore_msg(name, _tst_stringize(name), __VA_ARGS__)
 
 /************************************ Assert headers **********************************/
 

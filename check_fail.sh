@@ -1,4 +1,4 @@
-./fail
+./$1
 # If the return code of the fail executable is a failure, then return success and vice versa.
 RET=$?
 if [ $RET -ne 0 ]; then

@@ -1,18 +1,21 @@
 #include <string.h>
 #include "tst_utils.h"
 
-unsigned _tst_stat_passed = 0;
-unsigned _tst_stat_failed = 0;
+struct _tst_Stats _tst_stats = {0};
 unsigned _tst_indent_level = 0;
 
 // Returns 1 if tests fail, 0 if tests succeed. Used to report test results
 int tst_results(void)
 {
     _tst_print("-------------------------------------------------------------------\n");
-    int passed = _tst_stat_failed == 0;
+    // Fails and xpasses will fail the suite
+    int passed = _tst_stats.failed == 0 && _tst_stats.xpassed == 0;
     const char * symbol =
         passed ? _tst_green(_tst_checkmark_line) : _tst_red(_tst_crossmark_line);
-    _tst_print("%s %u passed, %u failed!\n", symbol, _tst_stat_passed, _tst_stat_failed);
+    _tst_print(
+        "%s %u passed, %u failed, %u xfailed, %u xpassed, %u ignored.\n",
+        symbol, _tst_stats.passed, _tst_stats.failed,
+        _tst_stats.xfailed, _tst_stats.xpassed, _tst_stats.ignored);
     // Return 0 if everything is going well
     return !passed;
 }
