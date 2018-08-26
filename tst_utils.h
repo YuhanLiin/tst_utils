@@ -167,15 +167,39 @@ _tst_test_begin:
 
 // Header generation macros mirror the assert definition macros in the source file.
 // Use token paste directly so the type_names don't get macro expanded.
-#define _tst_equality_assert_headers_for_type(type_name, type)\
-    _tst_assert_header(_tst_assert_eq_ ## type_name, type);\
-    _tst_assert_header(_tst_assert_ne_ ## type_name, type);
+// Specifies header_macro so we can generate both scalar and array headers
+#define _tst_equality_assert_headers_for_type(header_macro, type_name, type)\
+    header_macro(_tst_assert_eq_ ## type_name, type);\
+    header_macro(_tst_assert_ne_ ## type_name, type);
 
-#define _tst_comparison_assert_headers_for_type(type_name, type)\
-    _tst_assert_header(_tst_assert_gt_ ## type_name, type);\
-    _tst_assert_header(_tst_assert_ge_ ## type_name, type);\
-    _tst_assert_header(_tst_assert_lt_ ## type_name, type);\
-    _tst_assert_header(_tst_assert_le_ ## type_name, type);
+#define _tst_comparison_assert_headers_for_type(header_macro, type_name, type)\
+    header_macro(_tst_assert_gt_ ## type_name, type);\
+    header_macro(_tst_assert_lt_ ## type_name, type);\
+
+#define _tst_cmp_equality_assert_headers_for_type(header_macro, type_name, type)\
+    header_macro(_tst_assert_ge_ ## type_name, type);\
+    header_macro(_tst_assert_le_ ## type_name, type);
+
+// Define equality and comparison asserts for a specific type.
+// To prevent the type_name from being macro expanded, paste an empty argument to it just
+// in case the type_name is a macro. As such, the "empty" argument needs to be really empty.
+#define _tst_all_assert_headers_for_type(header_macro, type_name, type, empty)\
+    _tst_equality_assert_headers_for_type(header_macro, type_name ## empty, type)\
+    _tst_comparison_assert_headers_for_type(header_macro, type_name ## empty, type)\
+    _tst_cmp_equality_assert_headers_for_type(header_macro, type_name ## empty, type)
+
+// The actual headers
+_tst_all_assert_headers_for_type(_tst_assert_header, int, int,)
+_tst_all_assert_headers_for_type(_tst_assert_header, uint, unsigned,)
+_tst_all_assert_headers_for_type(_tst_assert_header, ptr, const void *,)
+_tst_all_assert_headers_for_type(_tst_assert_header, char, char,)
+_tst_all_assert_headers_for_type(_tst_assert_header, size, size_t,)
+_tst_all_assert_headers_for_type(_tst_assert_header, long, long long int,)
+_tst_all_assert_headers_for_type(_tst_assert_header, ulong, unsigned long long int,)
+_tst_all_assert_headers_for_type(_tst_assert_header, str, const char *,)
+_tst_comparison_assert_headers_for_type(_tst_assert_header, dbl, double)
+    
+/************************************ Array assert headers **********************************/
 
 // Signature of array assertion function
 #define _tst_assert_array_header(assert_name, type)\
@@ -183,24 +207,16 @@ _tst_test_begin:
         const type * expr, const type * expected, size_t len,\
         const char * filename, int linenum, const char * expr_str, const char * expected_str)
 
-// Define equality and comparison asserts for a specific type.
-// To prevent the type_name from being macro expanded, paste an empty argument to it just
-// in case the type_name is a macro. As such, the "empty" argument needs to be really empty.
-#define _tst_all_assert_headers_for_type(type_name, type, empty)\
-    _tst_equality_assert_headers_for_type(type_name ## empty, type)\
-    _tst_comparison_assert_headers_for_type(type_name ## empty, type)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, int_arr, int,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, uint_arr, unsigned,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, ptr_arr, void * const,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, char_arr, char,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, size_arr, size_t,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, long_arr, long long int,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, ulong_arr, unsigned long long int,)
+_tst_all_assert_headers_for_type(_tst_assert_array_header, str_arr, char * const,)
+_tst_comparison_assert_headers_for_type(_tst_assert_array_header, dbl_arr, double)
 
-// The actual headers
-_tst_all_assert_headers_for_type(int, int,)
-_tst_all_assert_headers_for_type(uint, unsigned,)
-_tst_all_assert_headers_for_type(ptr, const void *,)
-_tst_all_assert_headers_for_type(char, char,)
-_tst_all_assert_headers_for_type(size, size_t,)
-_tst_all_assert_headers_for_type(long, long long int,)
-_tst_all_assert_headers_for_type(ulong, unsigned long long int,)
-_tst_all_assert_headers_for_type(str, const char *,)
-_tst_comparison_assert_headers_for_type(dbl, double)
-    
 /************************************ Assert macros **********************************/
 
 // Aborts the test and fails it.
@@ -264,8 +280,6 @@ _tst_comparison_assert_headers_for_type(dbl, double)
 
 #define tst_assert_gt_dbl(expr, expected) _tst_assert_base(_tst_assert_gt_dbl, expr, expected, #expr)
 #define tst_assert_lt_dbl(expr, expected) _tst_assert_base(_tst_assert_lt_dbl, expr, expected, #expr)
-#define tst_assert_ge_dbl(expr, expected) _tst_assert_base(_tst_assert_ge_dbl, expr, expected, #expr)
-#define tst_assert_le_dbl(expr, expected) _tst_assert_base(_tst_assert_le_dbl, expr, expected, #expr)
 
 #define tst_assert_eq_str(expr, expected) _tst_assert_base(_tst_assert_eq_str, expr, expected, #expr)
 #define tst_assert_ne_str(expr, expected) _tst_assert_base(_tst_assert_ne_str, expr, expected, #expr)
@@ -273,4 +287,120 @@ _tst_comparison_assert_headers_for_type(dbl, double)
 #define tst_assert_lt_str(expr, expected) _tst_assert_base(_tst_assert_lt_str, expr, expected, #expr)
 #define tst_assert_ge_str(expr, expected) _tst_assert_base(_tst_assert_ge_str, expr, expected, #expr)
 #define tst_assert_le_str(expr, expected) _tst_assert_base(_tst_assert_le_str, expr, expected, #expr)
+
+/************************************ Assert macros **********************************/
+
+#define _tst_assert_array_base(assert_name, expr, expected, len, expr_str, expected_str) do {\
+    int _res = assert_name((expr), (expected), (len), __FILE__, __LINE__, expr_str, expected_str);\
+    if (!_res) tst_abort();\
+} while (0)
+
+#define tst_assert_eq_int_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_int_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_int_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_int_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_int_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_int_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_int_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_int_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_int_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_int_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_int_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_int_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_uint_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_uint_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_uint_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_uint_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_uint_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_uint_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_uint_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_uint_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_uint_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_uint_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_uint_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_uint_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_ptr_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_ptr_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_ptr_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_ptr_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_ptr_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_ptr_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_ptr_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_ptr_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_ptr_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_ptr_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_ptr_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_ptr_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_char_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_char_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_char_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_char_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_char_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_char_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_char_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_char_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_char_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_char_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_char_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_char_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_size_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_size_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_size_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_size_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_size_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_size_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_size_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_size_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_size_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_size_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_size_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_size_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_long_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_long_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_long_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_long_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_long_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_long_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_long_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_long_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_long_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_long_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_long_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_long_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_ulong_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_ulong_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_ulong_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_ulong_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_ulong_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_ulong_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_ulong_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_ulong_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_ulong_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_ulong_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_ulong_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_ulong_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_gt_dbl_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_dbl_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_dbl_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_dbl_arr, expr, expected, len, #expr, #expected)
+
+#define tst_assert_eq_str_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_eq_str_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ne_str_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ne_str_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_gt_str_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_gt_str_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_lt_str_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_lt_str_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_ge_str_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_ge_str_arr, expr, expected, len, #expr, #expected)
+#define tst_assert_le_str_arr(expr, expected, len)\
+    _tst_assert_base(_tst_assert_le_str_arr, expr, expected, len, #expr, #expected)
 

@@ -178,7 +178,7 @@ _tst_def_all_asserts_for_type(
     _tst_str_cmp_eq, _tst_str_cmp_gt, _tst_str_cmp_lt, _tst_str_cmp_ge, _tst_str_cmp_le)
 
 
-/*************************** Array Assert definitions and comparison macros *************************/
+/*************************** Array Assert definitions and comparison *************************/
 
 // Defines both the array comparison and assert definitions. Used if the asserts require a custom cmp
 #define _tst_def_array_cmp_and_assert(assert_def_macro, type, fmt_spec, type_name, cmp_gt, cmp_lt)\
