@@ -39,41 +39,6 @@ _tst_assert_header(assert_name, type)\
     return 1;\
 }
 
-// Defines array comparison function for specific type
-// Assume that if cmp_gt(a, b) and cmp_lt(a, b) are both untrue, then a must equal b.
-// Populates idx with the index on which the comparison was done and result is same as with strlen.
-#define _tst_def_array_cmp(type, type_name, cmp_gt, cmp_lt)\
-static int _tst_array_cmp_ ## type_name(const type * arr1, const type * arr2, size_t len, size_t * idx)\
-{\
-    for (*idx = 0; (*idx) < len; (*idx)++) {\
-        if (cmp_gt(arr1[*idx], arr2[*idx])) {\
-            return 1;\
-        } else if (cmp_gt(arr1[*idx], arr2[*idx])) {\
-            return -1;\
-        }\
-    }\
-    return 0;\
-}
-
-#define _tst_def_assert_array(assert_name, fmt_spec, type, cmp, op, cmp_text, is_not_eq)\
-_tst_assert_array_header(assert_name, type)\
-{\
-    size_t _idx;\
-    if(!(cmp(expr, expected, len, &_idx) op 0)) {\
-        _tst_print_assert_err(filename, linenum);\
-        /* Since array equality can't be pinned on a specific element, use different msg for ne asserts */\
-        if (is_not_eq) {\
-            _tst_perror("Expected %s to "cmp_text" %s\n", expr_str, expected_str);\
-        } else {\
-            _tst_perror(\
-                "Expected %s[%zu]="fmt_spec" to "cmp_text" %s[%zu]="fmt_spec"\n",\
-                expr_str, _idx, expr[_idx], expected_str, _idx, expected[_idx]);\
-        }\
-        return 0;\
-    }\
-    return 1;\
-}
-
 // Declares the eq and ne assertions for the specified type.
 // The cmp macro should test for equality.
 #define _tst_def_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
@@ -101,6 +66,46 @@ _tst_assert_array_header(assert_name, type)\
     _tst_def_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)\
     _tst_def_cmp_equality_assert_for_type(type_name, fmt_spec, type, cmp_ge, cmp_le)
 
+/************************************ Array Assert definition macros **********************************/
+
+// Defines array comparison function for specific type
+// Assume that if cmp_gt(a, b) and cmp_lt(a, b) are both untrue, then a must equal b.
+// Populates idx with the index on which the comparison was done and result is same as with strlen.
+#define _tst_def_array_cmp(type, type_name, cmp_gt, cmp_lt)\
+static int _tst_array_cmp_ ## type_name(const type * arr1, const type * arr2, size_t len, size_t * idx)\
+{\
+    for (*idx = 0; (*idx) < len; (*idx)++) {\
+        if (cmp_gt(arr1[*idx], arr2[*idx])) {\
+            return 1;\
+        } else if (cmp_gt(arr1[*idx], arr2[*idx])) {\
+            return -1;\
+        }\
+    }\
+    return 0;\
+}
+
+// Defines array assert.
+// Arg cmp is an actual function that has strcmp semantics and returns index where comparison was completed
+// Arg op is the comparison binop to use between cmp result and 0
+#define _tst_def_assert_array(assert_name, fmt_spec, type, cmp, op, cmp_text, is_not_eq)\
+_tst_assert_array_header(assert_name, type)\
+{\
+    size_t _idx;\
+    if(!(cmp(expr, expected, len, &_idx) op 0)) {\
+        _tst_print_assert_err(filename, linenum);\
+        /* Since array equality can't be pinned on a specific element, use different msg for ne asserts */\
+        if (is_not_eq) {\
+            _tst_perror("Expected %s to "cmp_text" %s\n", expr_str, expected_str);\
+        } else {\
+            _tst_perror(\
+                "Expected %s[%zu]="fmt_spec" to "cmp_text" %s[%zu]="fmt_spec"\n",\
+                expr_str, _idx, expr[_idx], expected_str, _idx, expected[_idx]);\
+        }\
+        return 0;\
+    }\
+    return 1;\
+}
+
 // Same as above but for array types
 #define _tst_def_equality_asserts_for_array(type_name, fmt_spec, type, cmp)\
     _tst_def_assert_array(_tst_assert_eq_ ## type_name, fmt_spec, type, cmp, ==, "equal", 0)\
@@ -111,6 +116,8 @@ _tst_assert_array_header(assert_name, type)\
         _tst_assert_gt_ ## type_name, fmt_spec, type, cmp, >, "be greater than", 0)\
     _tst_def_assert_array(\
         _tst_assert_lt_ ## type_name, fmt_spec, type, cmp, <, "be less than", 0)\
+
+#define _tst_def_cmp_equality_assert_for_array(type_name, fmt_spec, type, cmp)\
     _tst_def_assert_array(\
         _tst_assert_ge_ ## type_name, fmt_spec, type, cmp, >=, "be greater than or equal to", 0)\
     _tst_def_assert_array(\
@@ -118,7 +125,8 @@ _tst_assert_array_header(assert_name, type)\
 
 #define _tst_def_all_asserts_for_array(type_name, fmt_spec, type, cmp)\
     _tst_def_equality_asserts_for_array(type_name, fmt_spec, type, cmp)\
-    _tst_def_comparison_asserts_for_array(type_name, fmt_spec, type, cmp)
+    _tst_def_comparison_asserts_for_array(type_name, fmt_spec, type, cmp)\
+    _tst_def_cmp_equality_assert_for_array(type_name, fmt_spec, type, cmp)
 
 /****************************** Assert definitions and comparison macros ****************************/
 
