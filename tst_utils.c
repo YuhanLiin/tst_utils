@@ -192,7 +192,7 @@ _tst_def_array_cmp_and_assert(
     _tst_def_all_asserts_for_array, unsigned, "%u", uint, _tst_int_cmp_gt, _tst_int_cmp_lt)
 
 _tst_def_array_cmp_and_assert(
-    _tst_def_all_asserts_for_array, void const *, "%p", ptr, _tst_int_cmp_gt, _tst_int_cmp_lt)
+    _tst_def_all_asserts_for_array, void * const, "%p", ptr, _tst_int_cmp_gt, _tst_int_cmp_lt)
 
 _tst_def_array_cmp_and_assert(
     _tst_def_all_asserts_for_array, char, "'%c'", char, _tst_int_cmp_gt, _tst_int_cmp_lt)
@@ -209,4 +209,4 @@ _tst_def_array_cmp_and_assert(
 // On surface this will cause strcmp to be called twice per comparison in the cmp function,
 // so we'll trust the optimizer to bail us out on this one.
 _tst_def_array_cmp_and_assert(
-    _tst_def_all_asserts_for_array, char const *, "\"%s\"", str, _tst_str_cmp_gt, _tst_str_cmp_lt)
+    _tst_def_all_asserts_for_array, char * const, "\"%s\"", str, _tst_str_cmp_gt, _tst_str_cmp_lt)
