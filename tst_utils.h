@@ -163,9 +163,7 @@ _tst_test_begin:
 // Generates the signature of a assertion function based on its type
 // The last four args of the function will be passed in via the macro
 #define _tst_assert_header(assert_name, type)\
-int assert_name(\
-    type expr, type expected,\
-    const char * filename, int linenum, const char * expr_str) 
+    int assert_name(type expr, type expected, const char * filename, int linenum, const char * expr_str) 
 
 // Header generation macros mirror the assert definition macros in the source file.
 // Use token paste directly so the type_names don't get macro expanded.
@@ -178,6 +176,12 @@ int assert_name(\
     _tst_assert_header(_tst_assert_ge_ ## type_name, type);\
     _tst_assert_header(_tst_assert_lt_ ## type_name, type);\
     _tst_assert_header(_tst_assert_le_ ## type_name, type);
+
+// Signature of array assertion function
+#define _tst_assert_array_header(assert_name, type)\
+    int assert_name(\
+        const type * expr, const type * expected, size_t len,\
+        const char * filename, int linenum, const char * expr_str, const char * expected_str)
 
 // Define equality and comparison asserts for a specific type.
 // To prevent the type_name from being macro expanded, paste an empty argument to it just

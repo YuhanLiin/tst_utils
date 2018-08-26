@@ -22,19 +22,56 @@ int tst_results(void)
 
 /************************************ Assert definition macros **********************************/
 
+#define _tst_print_assert_err(filename, linenum)\
+    _tst_perror_line(_tst_red("") "Assert error at %s:%d: ", filename, linenum)
+
 // Generates assertion function definition for the specified type as well as the
 // comparison macro and format specifiers used for that type
 #define _tst_def_assert(assert_name, fmt_spec, type, cmp, cmp_text)\
 _tst_assert_header(assert_name, type)\
 {\
     if(!cmp(expr, expected)){\
-        _tst_perror_line(\
-                _tst_red("") "Assert error at %s:%d: Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n",\
-                filename, linenum, expr_str, expr, expected);\
+        _tst_print_assert_err(filename, linenum);\
+        _tst_perror(\
+            "Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n", expr_str, expr, expected);\
         return 0;\
-    } else {\
-        return 1;\
     }\
+    return 1;\
+}
+
+// Defines array comparison function for specific type
+// Assume that if cmp_gt(a, b) and cmp_lt(a, b) are both untrue, then a must equal b.
+// Populates idx with the index on which the comparison was done and result is same as with strlen.
+#define _tst_def_array_cmp(type, type_name, cmp_gt, cmp_lt)\
+static int _tst_array_cmp_ ## type_name(const type * arr1, const type * arr2, size_t len, size_t * idx)\
+{\
+    for (*idx = 0; (*idx) < len; (*idx)++) {\
+        if (cmp_gt(arr1[*idx], arr2[*idx])) {\
+            return 1;\
+        } else if (cmp_gt(arr1[*idx], arr2[*idx])) {\
+            return -1;\
+        }\
+    }\
+    return 0;\
+}
+
+#define _tst_def_assert_array(assert_name, fmt_spec, type, cmp, op, cmp_text, is_not_eq)\
+_tst_assert_array_header(assert_name, type)\
+{\
+    size_t _idx;\
+    if(!(cmp(expr, expected, len, &_idx) op 0)) {\
+        _tst_print_assert_err(filename, linenum);\
+        /* Since array equality can't be pinned on a specific element, use different msg for ne asserts */\
+        if (is_not_eq) {\
+            _tst_perror("Expected %s to "cmp_text" %s\n", expr_str, expected_str);\
+        } else {\
+            _tst_perror(\
+                "Expected %s[%zu]="fmt_spec" to "cmp_text" %s[%zu]="fmt_spec"\n",\
+                expr_str, _idx, expr[_idx], expected_str, _idx, expected[_idx]);\
+        }\
+        return 0;\
+    }\
+    return 1;\
 }
 
 // Declares the eq and ne assertions for the specified type.
@@ -59,6 +96,25 @@ _tst_assert_header(assert_name, type)\
 #define _tst_def_all_asserts_for_type(type_name, fmt_spec, type, cmp, cmp_gt, cmp_lt)\
     _tst_def_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
     _tst_def_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)
+
+// Same as above but for array types
+#define _tst_def_equality_asserts_for_array(type_name, fmt_spec, type, cmp)\
+    _tst_def_assert_array(_tst_assert_eq_ ## type_name, fmt_spec, type, cmp, ==, "equal", 0)\
+    _tst_def_assert_array(_tst_assert_ne_ ## type_name, fmt_spec, type, cmp, ==, "not equal", 1)
+
+#define _tst_def_comparison_asserts_for_array(type_name, fmt_spec, type, cmp)\
+    _tst_def_assert_array(\
+        _tst_assert_gt_ ## type_name, fmt_spec, type, cmp, >, "be greater than", 0)\
+    _tst_def_assert_array(\
+        _tst_assert_lt_ ## type_name, fmt_spec, type, cmp, <, "be less than", 0)\
+    _tst_def_assert_array(\
+        _tst_assert_ge_ ## type_name, fmt_spec, type, cmp, >=, "be greater than or equal to", 0)\
+    _tst_def_assert_array(\
+        _tst_assert_le_ ## type_name, fmt_spec, type, cmp, <=, "be less than or equal to", 0)\
+
+#define _tst_def_all_asserts_for_array(type_name, fmt_spec, type, cmp)\
+    _tst_def_equality_asserts_for_array(type_name, fmt_spec, type, cmp)\
+    _tst_def_comparison_asserts_for_array(type_name, fmt_spec, type, cmp)
 
 /****************************** Assert definitions and comparison macros ****************************/
 
@@ -93,3 +149,36 @@ _tst_def_comparison_asserts_for_type(dbl, "%f", double, _tst_int_cmp_gt, _tst_in
 _tst_def_all_asserts_for_type(
     str, "\"%s\"", const char *, _tst_str_cmp_eq, _tst_str_cmp_gt, _tst_str_cmp_lt)
 
+
+/*************************** Array Assert definitions and comparison macros *************************/
+
+// Defines both the array comparison and assert definitions. Used if the asserts require a custom cmp
+#define _tst_def_array_cmp_and_assert(assert_def_macro, type, fmt_spec, type_name, cmp_gt, cmp_lt)\
+    _tst_def_array_cmp(type, type_name, cmp_gt, cmp_lt)\
+    assert_def_macro(type_name ## _arr, fmt_spec, type, _tst_array_cmp_ ## type_name)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, int, "%d", int, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, unsigned, "%u", uint, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, void const *, "%p", ptr, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, char, "'%c'", char, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, long long int, "%lld", long, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, unsigned long long int, "%llu", ulong, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+_tst_def_array_cmp_and_assert(
+    _tst_def_comparison_asserts_for_array, double, "%f", dbl, _tst_int_cmp_gt, _tst_int_cmp_lt)
+
+// On surface this will cause strcmp to be called twice per comparison in the cmp function,
+// so we'll trust the optimizer to bail us out on this one.
+_tst_def_array_cmp_and_assert(
+    _tst_def_all_asserts_for_array, char const *, "\"%s\"", str, _tst_str_cmp_gt, _tst_str_cmp_lt)
