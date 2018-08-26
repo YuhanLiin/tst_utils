@@ -296,111 +296,111 @@ _tst_comparison_assert_headers_for_type(_tst_assert_array_header, dbl_arr, doubl
 } while (0)
 
 #define tst_assert_eq_int_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_int_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_int_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_int_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_int_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_int_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_int_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_int_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_int_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_int_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_int_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_int_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_int_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_int_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_int_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_int_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_int_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_int_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_uint_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_uint_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_uint_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_uint_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_uint_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_uint_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_uint_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_uint_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_uint_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_uint_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_uint_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_uint_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_uint_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_uint_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_uint_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_uint_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_uint_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_uint_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_ptr_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_ptr_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_ptr_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_ptr_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_ptr_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_ptr_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_ptr_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_ptr_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_ptr_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_ptr_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_ptr_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_ptr_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_ptr_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_ptr_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_ptr_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_ptr_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_ptr_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_ptr_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_char_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_char_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_char_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_char_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_char_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_char_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_char_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_char_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_char_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_char_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_char_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_char_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_char_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_char_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_char_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_char_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_char_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_char_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_size_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_size_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_size_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_size_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_size_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_size_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_size_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_size_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_size_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_size_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_size_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_size_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_size_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_size_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_size_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_size_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_size_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_size_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_long_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_long_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_long_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_long_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_long_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_long_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_long_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_long_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_long_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_long_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_long_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_long_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_long_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_long_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_long_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_long_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_long_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_long_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_ulong_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_ulong_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_ulong_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_ulong_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_ulong_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_ulong_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_ulong_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_ulong_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_ulong_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_ulong_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_ulong_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_ulong_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_ulong_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_ulong_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_ulong_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_ulong_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_ulong_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_ulong_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_gt_dbl_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_dbl_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_dbl_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_dbl_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_dbl_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_dbl_arr, expr, expected, len, #expr, #expected)
 
 #define tst_assert_eq_str_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_eq_str_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_eq_str_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ne_str_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ne_str_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ne_str_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_gt_str_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_gt_str_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_gt_str_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_lt_str_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_lt_str_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_lt_str_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_ge_str_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_ge_str_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_ge_str_arr, expr, expected, len, #expr, #expected)
 #define tst_assert_le_str_arr(expr, expected, len)\
-    _tst_assert_base(_tst_assert_le_str_arr, expr, expected, len, #expr, #expected)
+    _tst_assert_array_base(_tst_assert_le_str_arr, expr, expected, len, #expr, #expected)
 
