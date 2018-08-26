@@ -108,6 +108,9 @@ _tst_test_begin:
 
 /************************************ Test runner macros **********************************/
 
+void _tst_print_test_results(
+    enum _tst_Result result, const char * msg, const char * filename, int linenum, const char * argstr);
+
 // Runs test case and prints message according to the result.
 // The ignore and xfail flags modify the result before the message is printed.
 #define _tst_test_base(name, msg, ignore, xfail, ...) do {\
@@ -117,33 +120,7 @@ _tst_test_begin:
         else if (_result == _tst_FAIL) { _result = _tst_XFAIL; }\
     }\
     else if (ignore) { _result = _tst_IGNORE; }\
-\
-    switch (_result) {\
-        case _tst_PASS:\
-            _tst_print_line(_tst_green(_tst_checkmark" Test \"%s\" passed\n"), (msg));\
-            _tst_stats.passed++; break;\
-        case _tst_FAIL:\
-            _tst_print_line(\
-                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),\
-                    (msg), #__VA_ARGS__, __FILE__, __LINE__);\
-            _tst_stats.failed++; break;\
-        case _tst_XPASS:\
-            _tst_print_line(\
-                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) unexpectedly passed at %s:%d!\n"),\
-                msg, #__VA_ARGS__, __FILE__, __LINE__);\
-            _tst_stats.xpassed++; break;\
-        case _tst_XFAIL:\
-            _tst_print_line(\
-                _tst_blue(_tst_checkmark" Test \"%s\" failed as expected at %s:%d!\n"),\
-                msg, __FILE__, __LINE__);\
-            _tst_stats.xfailed++; break;\
-        case _tst_IGNORE:\
-            _tst_print_line(\
-                _tst_yellow(_tst_checkmark" Test \"%s\" results ignored at %s:%d!\n"),\
-                msg, __FILE__, __LINE__);\
-            _tst_stats.ignored++; break;\
-        default: _tst_perror_line("WTF unrecognized test result\n");\
-    }\
+    _tst_print_test_results(_result, msg, __FILE__, __LINE__, #__VA_ARGS__);\
 } while (0)\
 
 // Run test case with custom message to print with the results.
