@@ -99,12 +99,8 @@ tst_begin_test(str_asserts, void)
 
 tst_begin_test(dbl_asserts, void)
 {
-    tst_assert_ge_dbl(2.5, 1.5);
     tst_assert_gt_dbl(2.5, 1.5);
-    tst_assert_le_dbl(2.5, 4.5);
     tst_assert_lt_dbl(2.5, 4.5);
-    tst_assert_ge_dbl(0.5, 0.5);
-    tst_assert_le_dbl(0.5, 0.5);
 } tst_end_test
 
 void asserts_passing_tests(void)

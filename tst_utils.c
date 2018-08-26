@@ -86,16 +86,20 @@ _tst_assert_array_header(assert_name, type)\
     _tst_def_assert(\
         _tst_assert_gt_ ## type_name, fmt_spec, type, cmp_gt, "be greater than")\
     _tst_def_assert(\
-        _tst_assert_ge_ ## type_name, fmt_spec, type, !cmp_lt, "be greater than or equal to")\
-    _tst_def_assert(\
         _tst_assert_lt_ ## type_name, fmt_spec, type, cmp_lt, "be less than")\
+
+// Declares the less/greater than or equal conditions for specified type
+#define _tst_def_cmp_equality_assert_for_type(type_name, fmt_spec, type, cmp_ge, cmp_le)\
     _tst_def_assert(\
-        _tst_assert_le_ ## type_name, fmt_spec, type, !cmp_gt, "be less than or equal to")
+        _tst_assert_ge_ ## type_name, fmt_spec, type, cmp_ge, "be greater than or equal to")\
+    _tst_def_assert(\
+        _tst_assert_le_ ## type_name, fmt_spec, type, cmp_le, "be less than or equal to")
 
 // Declares all 6 assertions for specified type. Only available for numerical types
-#define _tst_def_all_asserts_for_type(type_name, fmt_spec, type, cmp, cmp_gt, cmp_lt)\
-    _tst_def_equality_asserts_for_type(type_name, fmt_spec, type, cmp)\
-    _tst_def_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)
+#define _tst_def_all_asserts_for_type(type_name, fmt_spec, type, cmp_eq, cmp_gt, cmp_lt, cmp_ge, cmp_le)\
+    _tst_def_equality_asserts_for_type(type_name, fmt_spec, type, cmp_eq)\
+    _tst_def_comparison_asserts_for_type(type_name, fmt_spec, type, cmp_gt, cmp_lt)\
+    _tst_def_cmp_equality_assert_for_type(type_name, fmt_spec, type, cmp_ge, cmp_le)
 
 // Same as above but for array types
 #define _tst_def_equality_asserts_for_array(type_name, fmt_spec, type, cmp)\
@@ -122,21 +126,34 @@ _tst_assert_array_header(assert_name, type)\
 #define _tst_int_cmp_eq(a, b) (a == b)
 #define _tst_int_cmp_gt(a, b) (a > b)
 #define _tst_int_cmp_lt(a, b) (a < b)
-
-_tst_def_all_asserts_for_type(int, "%d", int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-_tst_def_all_asserts_for_type(uint, "%u", unsigned, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+#define _tst_int_cmp_ge(a, b) (a >= b)
+#define _tst_int_cmp_le(a, b) (a <= b)
 
 _tst_def_all_asserts_for_type(
-    ptr, "%p", const void *, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+    int, "%d", int,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
+_tst_def_all_asserts_for_type(
+    uint, "%u", unsigned,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
 
-_tst_def_all_asserts_for_type(char, "'%c'", char, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
-_tst_def_all_asserts_for_type(size, "%zu", size_t, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+_tst_def_all_asserts_for_type(
+    ptr, "%p", const void *,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
+
+_tst_def_all_asserts_for_type(
+    char, "'%c'", char,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
+_tst_def_all_asserts_for_type(
+    size, "%zu", size_t,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
 
 // These "long" asserts are for long long types
 _tst_def_all_asserts_for_type(
-    long, "%lld", long long int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+    long, "%lld", long long int,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
 _tst_def_all_asserts_for_type(
-    ulong, "%llu", unsigned long long int, _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt)
+    ulong, "%llu", unsigned long long int,
+    _tst_int_cmp_eq, _tst_int_cmp_gt, _tst_int_cmp_lt, _tst_int_cmp_ge, _tst_int_cmp_le)
 
 // TODO double equality asserts, which are nontrivial
 _tst_def_comparison_asserts_for_type(dbl, "%f", double, _tst_int_cmp_gt, _tst_int_cmp_lt)
@@ -145,9 +162,12 @@ _tst_def_comparison_asserts_for_type(dbl, "%f", double, _tst_int_cmp_gt, _tst_in
 #define _tst_str_cmp_eq(a, b) (strcmp(a, b) == 0)
 #define _tst_str_cmp_gt(a, b) (strcmp(a, b) > 0)
 #define _tst_str_cmp_lt(a, b) (strcmp(a, b) < 0)
+#define _tst_str_cmp_ge(a, b) (strcmp(a, b) >= 0)
+#define _tst_str_cmp_le(a, b) (strcmp(a, b) <= 0)
 
 _tst_def_all_asserts_for_type(
-    str, "\"%s\"", const char *, _tst_str_cmp_eq, _tst_str_cmp_gt, _tst_str_cmp_lt)
+    str, "\"%s\"", const char *,
+    _tst_str_cmp_eq, _tst_str_cmp_gt, _tst_str_cmp_lt, _tst_str_cmp_ge, _tst_str_cmp_le)
 
 
 /*************************** Array Assert definitions and comparison macros *************************/
