@@ -17,6 +17,7 @@ int main(void)
     teardown_tests();
     macro_expansion_tests();
     array_asserts_passing_tests();
+    array_asserts_xfailing_tests();
 
     return tst_results();
 }

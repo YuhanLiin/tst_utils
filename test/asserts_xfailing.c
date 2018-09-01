@@ -276,7 +276,7 @@ tst_begin_test(dbl_lt, void)
 void asserts_xfailing_tests(void)
 {
     // Test for failure cases of all assertions
-    tst_begin_suite(ALL_XFAIL)
+    tst_begin_suite(XFAILING_ASSERTS)
     {
         tst_begin_suite(INT)
         {

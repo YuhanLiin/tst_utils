@@ -33,7 +33,7 @@ _tst_assert_header(assert_name, type)\
     if(!cmp(expr, expected)){\
         _tst_print_assert_err(filename, linenum);\
         _tst_perror(\
-            "Expected %s="fmt_spec" to "cmp_text" "fmt_spec"\n", expr_str, expr, expected);\
+            "Expected %s="fmt_spec" to "cmp_text" "fmt_spec"!\n", expr_str, expr, expected);\
         return 0;\
     }\
     return 1;\
@@ -95,10 +95,10 @@ _tst_assert_array_header(assert_name, type)\
         _tst_print_assert_err(filename, linenum);\
         /* If the index goes past the end of the array then it can't be used to print elements */\
         if (_idx >= len) {\
-            _tst_perror("Expected %s to "cmp_text" %s\n", expr_str, expected_str);\
+            _tst_perror("Expected %s to "cmp_text" %s, but they are equal!\n", expr_str, expected_str);\
         } else {\
             _tst_perror(\
-                "Expected %s[%zu]="fmt_spec" to "cmp_text" %s[%zu]="fmt_spec"\n",\
+                "Expected %s[%zu]="fmt_spec" to "cmp_text" %s[%zu]="fmt_spec"!\n",\
                 expr_str, _idx, expr[_idx], expected_str, _idx, expected[_idx]);\
         }\
         return 0;\
