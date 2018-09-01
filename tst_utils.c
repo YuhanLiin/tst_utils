@@ -51,10 +51,29 @@ int tst_results(void)
     return !passed;
 }
 
-/************************************ Assert definition macros **********************************/
+/************************************ Unary assert definition macros **********************************/
 
 #define _tst_print_assert_err(filename, linenum)\
     _tst_perror_line(_tst_red("") "Assert error at %s:%d: ", filename, linenum)
+
+#define _tst_def_unary_assert(assert_ext, tester, status_txt)\
+_tst_assert_unary_header(assert_ext)\
+{\
+    if( !(tester(expr)) ) {\
+        _tst_print_assert_err(filename, linenum);\
+        _tst_perror("Expected %s to be "status_txt"!\n", expr_str);\
+        return 0;\
+    }\
+    return 1;\
+}
+
+#define _tst_tester_true(expr) (expr)
+#define _tst_tester_false(expr) (!(expr))
+
+_tst_def_unary_assert(, _tst_tester_true, "true")
+_tst_def_unary_assert(_false, _tst_tester_false, "false")
+
+/************************************ Assert definition macros **********************************/
 
 // Generates assertion function definition for the specified type as well as the
 // comparison macro and format specifiers used for that type

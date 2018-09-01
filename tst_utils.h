@@ -135,6 +135,19 @@ void _tst_print_test_results(
 #define tst_test_xfail(name, ...) tst_test_msg_xfail(name, _tst_stringize(name), __VA_ARGS__)
 #define tst_test_ignore(name, ...) tst_test_msg_ignore(name, _tst_stringize(name), __VA_ARGS__)
 
+/************************************ Unary assert headers **********************************/
+
+// This assert only takes one boolean value
+#define _tst_assert_unary_header(assert_ext)\
+    int _tst_assert ## assert_ext(int expr, const char * filename, int linenum, const char * expr_str)
+
+// Unary asserts headers
+_tst_assert_unary_header();
+_tst_assert_unary_header(_false);
+
+#define tst_assert(expr) _tst_assert_unary_header() (expr, __FILE__, __LINE__, #expr)
+#define tst_assert_false(expr) _tst_assert_unary_header(_false) (expr, __FILE__, __LINE__, #expr)
+
 /************************************ Assert headers **********************************/
 
 // Generates the signature of a assertion function based on its type
