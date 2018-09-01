@@ -273,21 +273,10 @@ tst_begin_test(dbl_lt, void)
     tst_assert_lt_dbl(2.5, 2.5);
 } tst_end_test
 
-tst_begin_test(dbl_ge, void)
-{
-    tst_assert_ge_dbl(1.5, 2.5);
-} tst_end_test
-
-tst_begin_test(dbl_le, void)
-{
-    tst_assert_le_dbl(5.5, 2.5);
-} tst_end_test
-
-
 void asserts_xfailing_tests(void)
 {
     // Test for failure cases of all assertions
-    tst_begin_suite(ALL_XFAIL)
+    tst_begin_suite(XFAILING_ASSERTS)
     {
         tst_begin_suite(INT)
         {
@@ -373,8 +362,6 @@ void asserts_xfailing_tests(void)
         {
             tst_test_xfail(dbl_lt,);
             tst_test_xfail(dbl_gt,);
-            tst_test_xfail(dbl_le,);
-            tst_test_xfail(dbl_ge,);
         } tst_end_suite
 
     } tst_end_suite
