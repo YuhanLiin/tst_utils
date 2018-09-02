@@ -1,5 +1,22 @@
 #include "tst_utils.h"
 
+// Unary asserts
+tst_begin_test(true_expr, void)
+    tst_assert(1 + 1 == 0);
+tst_end_test
+
+tst_begin_test(true_0, void)
+    tst_assert(0);
+tst_end_test
+
+tst_begin_test(false_expr, void)
+    tst_assert_false(5 + 5 == 10);
+tst_end_test
+
+tst_begin_test(false_1, void)
+    tst_assert_false(1);
+tst_end_test
+
 // Int asserts
 tst_begin_test(int_eq, void)
 {
@@ -278,6 +295,14 @@ void asserts_xfailing_tests(void)
     // Test for failure cases of all assertions
     tst_begin_suite(XFAILING_ASSERTS)
     {
+        tst_begin_suite(UNARY)
+        {
+            tst_test_xfail(true_0,);
+            tst_test_xfail(true_expr,);
+            tst_test_xfail(false_1,);
+            tst_test_xfail(false_expr,);
+        } tst_end_suite
+
         tst_begin_suite(INT)
         {
             tst_test_xfail(int_eq,);

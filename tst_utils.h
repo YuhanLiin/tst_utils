@@ -135,6 +135,9 @@ void _tst_print_test_results(
 #define tst_test_xfail(name, ...) tst_test_msg_xfail(name, _tst_stringize(name), __VA_ARGS__)
 #define tst_test_ignore(name, ...) tst_test_msg_ignore(name, _tst_stringize(name), __VA_ARGS__)
 
+// Aborts the test and fails it. Used inside tests.
+#define tst_abort() goto _tst_test_failed
+
 /************************************ Unary assert headers **********************************/
 
 // This assert only takes one boolean value
@@ -145,8 +148,12 @@ void _tst_print_test_results(
 _tst_assert_unary_header();
 _tst_assert_unary_header(_false);
 
-#define tst_assert(expr) _tst_assert_unary_header() (expr, __FILE__, __LINE__, #expr)
-#define tst_assert_false(expr) _tst_assert_unary_header(_false) (expr, __FILE__, __LINE__, #expr)
+#define _tst_assert_unary_base(assert_name, expr) do {\
+    if ( !assert_name((expr), __FILE__, __LINE__, #expr) ) tst_abort();\
+} while (0)
+
+#define tst_assert(expr) _tst_assert_unary_base(_tst_assert, expr)
+#define tst_assert_false(expr) _tst_assert_unary_base(_tst_assert_false, expr)
 
 /************************************ Assert headers **********************************/
 
@@ -208,9 +215,6 @@ _tst_all_assert_headers_for_type(_tst_assert_array_header, str_arr, char * const
 _tst_comparison_assert_headers_for_type(_tst_assert_array_header, dbl_arr, double)
 
 /************************************ Assert macros **********************************/
-
-// Aborts the test and fails it.
-#define tst_abort() goto _tst_test_failed
 
 // On assert failure, jump to end of test
 #define _tst_assert_base(assert_name, expr, expected, expr_str) do {\

@@ -1,5 +1,13 @@
 #include "tst_utils.h"
 
+tst_begin_test(unary_asserts, void)
+{
+    tst_assert(1 + 1 == 2);
+    tst_assert(-10);
+    tst_assert_false(4 - 3 == 0);
+    tst_assert_false(0);
+} tst_end_test
+
 tst_begin_test(int_asserts, void)
 {
     tst_assert_eq_int(-1, -1);
@@ -107,6 +115,7 @@ void asserts_passing_tests(void)
 {
     tst_begin_suite(PASSING_ASSERTS)
     {
+        tst_test(unary_asserts,);
         tst_test(int_asserts,);
         tst_test(long_asserts,);
         tst_test(uint_asserts,);
