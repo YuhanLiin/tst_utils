@@ -13,12 +13,12 @@ void _tst_print_test_results(
             _tst_stats.passed++; break;
         case _tst_FAIL:
             _tst_print_line(
-                _tst_red(_tst_crossmark" Test \"%s\" with argstr=(%s) failed at %s:%d!\n"),
+                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) failed at %s:%d!\n"),
                     (msg), argstr, filename, linenum);
             _tst_stats.failed++; break;
         case _tst_XPASS:
             _tst_print_line(
-                _tst_red(_tst_crossmark" Test \"%s\" with argstr=(%s) unexpectedly passed at %s:%d!\n"),
+                _tst_red(_tst_crossmark" Test \"%s\" with args=(%s) unexpectedly passed at %s:%d!\n"),
                 msg, argstr, filename, linenum);
             _tst_stats.xpassed++; break;
         case _tst_XFAIL:
